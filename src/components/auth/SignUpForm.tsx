@@ -310,7 +310,7 @@ export default function SignUpForm() {
       
       // Upload profile picture if registration was successful
       if (data && data.user && profilePicture) {
-        const { error: uploadError } = await uploadAvatar(profilePicture, data.user.id);
+        const { error: uploadError } = await uploadAvatar(profilePicture);
         
         if (uploadError) {
           console.error('Error uploading profile picture:', uploadError);
