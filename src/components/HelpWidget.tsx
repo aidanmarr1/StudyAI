@@ -19,17 +19,30 @@ export default function HelpWidget() {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-[9999]">
-      {/* Launcher button - Made larger and more noticeable */}
+    <div className="fixed bottom-6 right-6" style={{ zIndex: 99999 }}>
+      {/* Launcher button - Made larger and more noticeable with inline styles for reliability */}
       <button 
         onClick={toggleWidget}
-        className="w-16 h-16 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 text-white flex items-center justify-center shadow-xl hover:shadow-2xl transition-all duration-300 focus:outline-none border-2 border-white dark:border-gray-800 animate-pulse"
+        style={{
+          width: '70px',
+          height: '70px',
+          borderRadius: '50%',
+          background: 'linear-gradient(to right, #3B82F6, #8B5CF6)',
+          color: 'white',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+          border: '3px solid white',
+          transition: 'all 0.3s ease',
+          position: 'relative'
+        }}
         aria-label="Help and support"
       >
         {isOpen ? (
-          <X className="w-8 h-8" />
+          <X style={{ width: '32px', height: '32px' }} />
         ) : (
-          <MessageSquare className="w-8 h-8" />
+          <MessageSquare style={{ width: '32px', height: '32px' }} />
         )}
       </button>
 
