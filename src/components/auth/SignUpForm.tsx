@@ -262,7 +262,7 @@ export default function SignUpForm() {
     }
     
     // Basic phone validation
-    const phoneRegex = /^\+?[0-9\s\-\(\)]{7,15}$/;
+    const phoneRegex = /^\+?[0-9\s\-()]{7,15}$/;
     if (!phoneRegex.test(phone)) {
       setError('Please enter a valid phone number');
       return;
