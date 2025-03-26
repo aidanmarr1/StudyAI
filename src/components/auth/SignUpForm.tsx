@@ -191,7 +191,7 @@ export default function SignUpForm() {
         clearTimeout(emailDebounceTimer.current);
       }
     };
-  }, [email, checkExistingUser]);
+  }, [email]);
   
   useEffect(() => {
     // Clear previous timer
@@ -218,7 +218,7 @@ export default function SignUpForm() {
         clearTimeout(phoneDebounceTimer.current);
       }
     };
-  }, [phone, checkExistingUser]);
+  }, [phone]);
   
   // Check for username availability
   useEffect(() => {
@@ -246,7 +246,7 @@ export default function SignUpForm() {
         clearTimeout(usernameDebounceTimer.current);
       }
     };
-  }, [username, checkExistingUser]);
+  }, [username]);
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
