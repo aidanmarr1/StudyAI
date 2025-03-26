@@ -195,11 +195,11 @@ export default function ProfilePage() {
       
       // Only include fields that have changed
       if (username !== (userProfile?.username || '')) {
-        profileData.username = username || null;
+        profileData.username = username || undefined;
       }
       
       if (displayName !== (userProfile?.display_name || '')) {
-        profileData.display_name = displayName || null;
+        profileData.display_name = displayName || undefined;
       }
       
       // If no changes, don't submit
