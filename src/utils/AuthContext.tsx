@@ -19,6 +19,8 @@ type AuthContextType = {
   isLoading: boolean;
   userProfile: UserProfile | null;
   refreshProfile: () => Promise<void>;
+  updateProfile: (updates: Partial<UserProfile>) => Promise<{ success: boolean; error: Error | null }>;
+  uploadAvatar: (file: File) => Promise<{ success: boolean; error: Error | null; url?: string }>;
   signUp: (email: string, password: string) => Promise<{
     error: Error | null;
     data: any | null;
@@ -51,6 +53,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
     } catch (error) {
       console.error('Error refreshing profile:', error);
+    }
+  };
+
+  const updateProfile = async (updates: Partial<UserProfile>) => {
+    if (!user) return { success: false, error: new Error('User not logged in') };
+    
+    try {
+      // Mock implementation - in a real app, this would update Supabase
+      setUserProfile(prev => prev ? { ...prev, ...updates } : null);
+      return { success: true, error: null };
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      return { success: false, error: error as Error };
+    }
+  };
+
+  const uploadAvatar = async (file: File) => {
+    if (!user) return { success: false, error: new Error('User not logged in') };
+    
+    try {
+      // Mock implementation - in a real app, this would upload to storage
+      const mockUrl = `https://via.placeholder.com/150?text=${file.name.substring(0, 5)}`;
+      await updateProfile({ avatar_url: mockUrl });
+      return { success: true, error: null, url: mockUrl };
+    } catch (error) {
+      console.error('Error uploading avatar:', error);
+      return { success: false, error: error as Error };
     }
   };
 
@@ -123,6 +152,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isLoading,
     userProfile,
     refreshProfile,
+    updateProfile,
+    uploadAvatar,
     signUp,
     signIn,
     signOut,
