@@ -2,7 +2,7 @@
 
 import React, { useState, useRef } from "react";
 import { motion, useInView } from "framer-motion";
-import { Sparkles } from "lucide-react";
+import { Sparkles, ArrowRight, Zap, LayoutGrid, LineChart, BookOpen, Brain, Lightbulb, Clock, PenTool, Target, RefreshCw } from "lucide-react";
 
 interface FeatureCardProps {
   title: string;
