@@ -1,7 +1,7 @@
 // @ts-nocheck
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageSquare, X, Search, Settings, Home, Users, TicketCheck, HelpCircle, Clock, BookOpen, ChevronRight, Plus, Send } from "lucide-react";
 
@@ -9,6 +9,15 @@ export default function HelpWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("home");
   const [searchQuery, setSearchQuery] = useState("");
+  const [isPulsing, setIsPulsing] = useState(true);
+
+  // Add pulsing effect that repeats every 2 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIsPulsing(prev => !prev);
+    }, 2000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
@@ -19,30 +28,41 @@ export default function HelpWidget() {
   };
 
   return (
-    <div className="fixed bottom-6 right-6" style={{ zIndex: 99999 }}>
-      {/* Launcher button - Made larger and more noticeable with inline styles for reliability */}
+    <div id="help-widget-container" style={{ 
+      position: 'fixed', 
+      bottom: '30px', 
+      right: '30px', 
+      zIndex: 999999,
+      pointerEvents: 'auto'
+    }}>
+      {/* Launcher button - Guaranteed to be visible with strongest styling possible */}
       <button 
         onClick={toggleWidget}
         style={{
-          width: '70px',
-          height: '70px',
+          width: '80px',
+          height: '80px',
           borderRadius: '50%',
-          background: 'linear-gradient(to right, #3B82F6, #8B5CF6)',
+          background: 'linear-gradient(to right, #4F46E5, #8B5CF6)',
           color: 'white',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-          border: '3px solid white',
-          transition: 'all 0.3s ease',
-          position: 'relative'
+          boxShadow: isPulsing 
+            ? '0 0 0 0 rgba(79, 70, 229, 0.7), 0 20px 25px -5px rgba(0, 0, 0, 0.2)' 
+            : '0 0 0 15px rgba(79, 70, 229, 0.2), 0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+          border: '4px solid white',
+          transition: 'all 0.5s ease',
+          cursor: 'pointer',
+          outline: 'none',
+          position: 'relative',
+          transform: isPulsing ? 'scale(1.05)' : 'scale(1)',
         }}
         aria-label="Help and support"
       >
         {isOpen ? (
-          <X style={{ width: '32px', height: '32px' }} />
+          <X style={{ width: '36px', height: '36px' }} />
         ) : (
-          <MessageSquare style={{ width: '32px', height: '32px' }} />
+          <MessageSquare style={{ width: '36px', height: '36px' }} />
         )}
       </button>
 
@@ -55,7 +75,11 @@ export default function HelpWidget() {
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ duration: 0.2 }}
             className="absolute bottom-20 right-0 w-80 md:w-96 bg-white dark:bg-gray-800 rounded-xl shadow-2xl overflow-hidden flex flex-col"
-            style={{ height: "500px", maxHeight: "calc(100vh - 150px)" }}
+            style={{ 
+              height: "500px", 
+              maxHeight: "calc(100vh - 150px)",
+              zIndex: 999998
+            }}
           >
             {/* Header */}
             <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">

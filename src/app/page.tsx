@@ -35,18 +35,21 @@ export default function Home() {
   }
 
   return (
-    <main>
-      <Navbar />
-      <Hero />
-      <Features />
-      <HowItWorks />
-      <Testimonials />
-      <MobileApp />
-      <Pricing />
-      <FAQ />
-      <Contact />
-      <Footer />
+    <>
+      <main>
+        <Navbar />
+        <Hero />
+        <Features />
+        <HowItWorks />
+        <Testimonials />
+        <MobileApp />
+        <Pricing />
+        <FAQ />
+        <Contact />
+        <Footer />
+      </main>
+      {/* Place HelpWidget outside main to ensure it's not affected by any container styles */}
       <HelpWidget />
-    </main>
+    </>
   );
 }
