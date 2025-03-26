@@ -67,7 +67,7 @@ export default function ProfilePage() {
     if (userProfile) {
       setUsername(userProfile.username || '');
       setDisplayName(userProfile.display_name || '');
-      setAvatarUrl(userProfile.avatar_url);
+      setAvatarUrl(userProfile.avatar_url || null);
       setIsLoading(false);
     }
   }, [userProfile]);
