@@ -11,6 +11,7 @@ import FAQ from "@/components/FAQ";
 import Contact from "@/components/Contact";
 import Footer from "@/components/Footer";
 import MobileApp from "@/components/MobileApp";
+import HelpWidget from '@/components/HelpWidget';
 
 export default function Home() {
   const [mounted, setMounted] = useState(false);
@@ -45,6 +46,7 @@ export default function Home() {
       <FAQ />
       <Contact />
       <Footer />
+      <HelpWidget />
     </main>
   );
 }
