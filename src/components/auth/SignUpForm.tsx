@@ -302,7 +302,7 @@ export default function SignUpForm() {
       }
       
       // Register the user
-      const { error: signUpError, data } = await signUp(email, password, phone, username, displayName);
+      const { error: signUpError, data } = await signUp(email, password);
       
       if (signUpError) {
         throw new Error(signUpError.message);
