@@ -18,14 +18,20 @@ import {
 
 type TabType = "home" | "conversations" | "tickets" | "help";
 
-const HelpWidget = () => {
-  const [isOpen, setIsOpen] = useState(false);
+interface ResourceItem {
+  icon: React.ReactElement;
+  title: string;
+  badge: string | null;
+}
+
+const HelpWidget: React.FC = () => {
+  const [isOpen, setIsOpen] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<TabType>("home");
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState<string>("");
 
   const toggleWidget = () => setIsOpen(!isOpen);
 
-  const tabContent = {
+  const tabContent: Record<TabType, React.ReactElement> = {
     home: (
       <div className="flex flex-col gap-4">
         <div className="px-6 flex flex-col gap-y-4 flex-1 mt-1 pb-4">
