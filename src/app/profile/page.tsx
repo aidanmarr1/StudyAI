@@ -123,14 +123,14 @@ export default function ProfilePage() {
     
     try {
       setIsLoading(true);
-      const { error, avatarUrl } = await uploadAvatar(file);
+      const { error, url } = await uploadAvatar(file);
       
       if (error) {
         throw new Error(error.message);
       }
       
-      if (avatarUrl) {
-        setAvatarUrl(avatarUrl);
+      if (url) {
+        setAvatarUrl(url);
         setMessage({
           type: 'success',
           text: 'Profile picture updated successfully!'
