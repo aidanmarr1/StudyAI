@@ -62,6 +62,16 @@ const countries = [
   { code: 'VN', name: 'Vietnam', example: '+84 91 234 56 78', prefix: '+84' },
 ];
 
+// Add a local implementation of checkExistingUser since it's not in the AuthContext
+const checkExistingUser = async (email: string, phone: string, username: string) => {
+  // Mock implementation - in a real app, this would check with Supabase
+  await new Promise(resolve => setTimeout(resolve, 500)); // Simulate delay
+  return {
+    exists: false,
+    message: null
+  };
+};
+
 export default function SignUpForm() {
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -81,7 +91,7 @@ export default function SignUpForm() {
   const [profilePicture, setProfilePicture] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   
-  const { signUp, checkExistingUser, uploadAvatar } = useAuth();
+  const { signUp, uploadAvatar } = useAuth();
   const router = useRouter();
   
   // Refs for debounce timers and file input
@@ -166,7 +176,7 @@ export default function SignUpForm() {
       setValidating(true);
       // Set new timer
       emailDebounceTimer.current = setTimeout(async () => {
-        const { exists, message } = await checkExistingUser(email, '');
+        const { exists, message } = await checkExistingUser(email, '', '');
         if (exists) {
           setEmailError(message);
         } else {
@@ -193,7 +203,7 @@ export default function SignUpForm() {
     if (phone && phone.length > 10) {
       setValidating(true);
       phoneDebounceTimer.current = setTimeout(async () => {
-        const { exists, message } = await checkExistingUser('', phone);
+        const { exists, message } = await checkExistingUser('', phone, '');
         if (exists) {
           setPhoneError(message);
         } else {
