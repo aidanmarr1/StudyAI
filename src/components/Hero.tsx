@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowRight, Sparkles, Brain, Send, BookOpen, BookText, GraduationCap, School, Library, Microscope, Dna, Calculator, Star } from "lucide-react";
+import { ArrowRight, Sparkles, Brain, Send, BookOpen, BookText, GraduationCap, School, Library, Microscope, Dna, Calculator, Star, Check, Zap, Lightbulb, Clock } from "lucide-react";
 import { useInView } from "react-intersection-observer";
 import Image from "next/image";
 
@@ -159,6 +159,25 @@ export default function Hero() {
     }
   ];
 
+  // Key benefits of StudyAI
+  const keyBenefits = [
+    {
+      icon: <Zap className="w-5 h-5 text-amber-500" />,
+      title: "Learn 3x Faster",
+      description: "Our AI-powered system adapts to your learning style and pace"
+    },
+    {
+      icon: <Lightbulb className="w-5 h-5 text-blue-500" />,
+      title: "Instant Explanations",
+      description: "Get clear, personalized explanations for any concept"
+    },
+    {
+      icon: <Clock className="w-5 h-5 text-green-500" />,
+      title: "Save Study Time",
+      description: "Focus on what matters most with smart study plans"
+    }
+  ];
+
   // Gradient position state
   const [gradientPosition, setGradientPosition] = useState({ x: 50, y: 50 });
 
@@ -169,6 +188,13 @@ export default function Hero() {
   const [showShine, setShowShine] = useState(false);
   const [currentRating, setCurrentRating] = useState(0);
   const targetRating = 4.9;
+
+  // Social proof metrics
+  const socialProofMetrics = [
+    { value: "500K+", label: "Students" },
+    { value: "4.9", label: "App Rating" },
+    { value: "98%", label: "Success Rate" }
+  ];
 
   // Scroll chat to bottom when messages change
   useEffect(() => {
@@ -327,40 +353,23 @@ export default function Hero() {
       }, 1500);
     };
 
-    startAnimation();
-  }, [inView, animationCycle]);  // Removed currentQAIndex and questionsAndAnswers from dependencies
+    // Fixing the dependencies for the useEffect hook - around line 331
+    useEffect(() => {
+      // Only start animation when component is in view
+      if (!inView) return;
 
-  // Add blinking cursor animation
-  useEffect(() => {
-    const style = document.createElement('style');
-    style.innerHTML = `
-      @keyframes blink {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0; }
-      }
-      .animate-blink {
-        animation: blink 1s infinite;
-      }
-    `;
-    document.head.appendChild(style);
-    
-    return () => {
-      document.head.removeChild(style);
-    };
-  }, []);
+      // Reset animation state
+      setIsRolling(false);
+      setCurrentRating(0);
+      
+      // Add delay before starting animation
+      const animationTimeout = setTimeout(() => {
+        startAnimation();
+      }, 1000);
+      
+      return () => clearTimeout(animationTimeout);
+    }, [inView, animationCycle, currentQAIndex, questionsAndAnswers]);
 
-  // Star rating lottery animation
-  useEffect(() => {
-    if (!inView) return;
-    
-    // Start the animation after a delay
-    const timeoutId = setTimeout(() => {
-      startRollingAnimation();
-    }, 3000);
-    
-    return () => clearTimeout(timeoutId);
-  }, [inView]);
-  
   const startRollingAnimation = () => {
     setIsRolling(true);
     setCurrentRating(0);
@@ -488,562 +497,274 @@ export default function Hero() {
   };
 
   return (
-    <section
-      ref={mergeRefs(heroRef, inViewRef)}
-      className="relative min-h-screen flex items-center justify-center px-6 py-24 overflow-hidden"
-      style={gradientStyle}
-    >
-      {/* Decorative elements */}
-      <motion.div 
-        className="absolute top-20 left-1/4 w-64 h-64 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"
-        initial={{ opacity: 0, scale: 0 }}
-        animate={{ opacity: 0.2, scale: 1 }}
-        transition={{ duration: 2, delay: 0.5 }}
-      />
-      <motion.div 
-        className="absolute bottom-20 right-1/4 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"
-        initial={{ opacity: 0, scale: 0 }}
-        animate={{ opacity: 0.2, scale: 1 }}
-        transition={{ duration: 2, delay: 0.8 }}
-      />
-      <motion.div 
-        className="absolute -top-20 right-1/3 w-60 h-60 bg-pink-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000"
-        initial={{ opacity: 0, scale: 0 }}
-        animate={{ opacity: 0.2, scale: 1 }}
-        transition={{ duration: 2, delay: 1.2 }}
-      />
+    <div ref={heroRef} className="relative bg-white dark:bg-gray-950 overflow-hidden" id="hero">
+      {/* Background gradient and effects */}
+      <div 
+        className="absolute inset-0 bg-gradient-to-b from-indigo-50 to-white dark:from-gray-900 dark:to-gray-950 opacity-80 dark:opacity-30"
+        style={{
+          backgroundPosition: `${gradientPosition.x}% ${gradientPosition.y}%`,
+          backgroundSize: '200% 200%',
+          transition: 'background-position 0.3s ease-out'
+        }}
+      ></div>
+      
+      {/* Decorative grid pattern */}
+      <div className="absolute inset-0 bg-grid-pattern opacity-[0.03] dark:opacity-[0.05]"></div>
+      
+      {/* Animated blobs */}
+      <div className="absolute top-1/4 right-[15%] w-64 h-64 bg-purple-300 dark:bg-purple-900 rounded-full filter blur-3xl opacity-20 dark:opacity-10 animate-blob"></div>
+      <div className="absolute bottom-1/4 left-[10%] w-72 h-72 bg-indigo-300 dark:bg-indigo-900 rounded-full filter blur-3xl opacity-20 dark:opacity-10 animate-blob animation-delay-2000"></div>
+      <div className="absolute top-1/3 left-[20%] w-56 h-56 bg-blue-300 dark:bg-blue-900 rounded-full filter blur-3xl opacity-20 dark:opacity-10 animate-blob animation-delay-4000"></div>
 
-      <div className="max-w-7xl w-full mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-        <motion.div
-          className="z-10"
-          variants={containerVariants}
-          initial="hidden"
-          animate={inView ? "visible" : "hidden"}
-        >
-          <motion.div variants={itemVariants} className="flex items-center mb-4 space-x-2">
-            <div className="flex items-center px-3 py-1 rounded-full border border-indigo-200 bg-indigo-50 dark:bg-indigo-900/20 dark:border-indigo-800">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-24 sm:pt-24 sm:pb-32 relative z-10">
+        <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
+          {/* Left column - Hero Text Content */}
+          <div className="flex-1 text-center lg:text-left max-w-3xl">
+            {/* Badge */}
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="inline-flex items-center px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-800 mb-5"
+            >
               <Sparkles className="h-4 w-4 text-indigo-600 dark:text-indigo-400 mr-2" />
-              <span className="text-sm font-medium text-indigo-600 dark:text-indigo-400">
-                AI-Powered Study Assistant
+              <span className="text-sm font-medium text-indigo-700 dark:text-indigo-400">
+                AI-Powered Learning Assistant
               </span>
-            </div>
-          </motion.div>
+            </motion.div>
 
-          <motion.h1
-            variants={itemVariants}
-            className="text-5xl md:text-6xl font-extrabold leading-tight tracking-tight mb-6"
-          >
-            Study Smarter with{" "}
-            <span className="text-gradient">
-              AI-Powered Learning
-            </span>
-          </motion.h1>
-
-          <motion.p
-            variants={itemVariants}
-            className="text-lg md:text-xl mb-8 max-w-2xl leading-relaxed"
-          >
-            Transform your learning experience with our advanced AI study assistant. 
-            Create comprehensive study guides, generate practice questions, and get instant feedback 
-            to help you master any subject effectively.
-          </motion.p>
-
-          <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-4">
-            <motion.button
-              className="bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white rounded-lg px-6 py-3 font-medium flex items-center justify-center shadow-md hover:shadow-lg transition-all"
-              variants={buttonVariants}
-              initial="initial"
-              whileHover="hover"
-              whileTap="tap"
+            {/* Headline */}
+            <motion.h1 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-gray-900 dark:text-white mb-6"
             >
-              Get Started Free
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </motion.button>
-            <motion.button
-              className="border border-gray-300 dark:border-gray-700 rounded-lg px-6 py-3 font-medium flex items-center justify-center backdrop-blur-sm hover:backdrop-blur-lg transition-all"
-              variants={buttonVariants}
-              initial="initial"
-              whileHover="hover"
-              whileTap="tap"
-            >
-              Watch Demo
-            </motion.button>
-          </motion.div>
+              <span className="block">Master Any Subject</span>
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400">
+                With AI at Your Side
+              </span>
+            </motion.h1>
 
-          <motion.div 
-            variants={captionVariants}
-            initial="hidden"
-            animate={inView ? "visible" : "hidden"}
-            className="mt-8 flex items-center"
-          >
-            <div className="flex -space-x-2 mr-3">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="w-8 h-8 rounded-full border-2 border-white dark:border-gray-800 overflow-hidden bg-gray-200">
-                  <Image 
-                    src={`https://randomuser.me/api/portraits/men/${i + 20}.jpg`} 
-                    alt={`User avatar ${i}`} 
-                    width={32} 
-                    height={32}
-                  />
+            {/* Subheadline */}
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              className="text-lg sm:text-xl text-gray-600 dark:text-gray-400 mb-8 max-w-2xl mx-auto lg:mx-0"
+            >
+              StudyAI transforms how you learn with personalized explanations, adaptive study plans, and interactive learning tools – all powered by cutting-edge artificial intelligence.
+            </motion.p>
+
+            {/* Key Benefits */}
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+              className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8"
+            >
+              {keyBenefits.map((benefit, index) => (
+                <div key={index} className="flex items-start p-3 rounded-lg bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700">
+                  <div className="flex-shrink-0 p-1.5 rounded-full bg-gray-50 dark:bg-gray-700">
+                    {benefit.icon}
+                  </div>
+                  <div className="ml-3 text-left">
+                    <h3 className="text-sm font-semibold text-gray-900 dark:text-white">{benefit.title}</h3>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{benefit.description}</p>
+                  </div>
                 </div>
               ))}
-            </div>
-            <span className="text-sm text-gray-600 dark:text-gray-400">
-              <span className="font-semibold text-gray-900 dark:text-white">5,000+</span> students already use StudyAI
-            </span>
+            </motion.div>
 
-            {/* Star rating lottery animation */}
-            <motion.div
-              className="mt-4 relative"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 2 }}
+            {/* CTA Buttons */}
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.5 }}
+              className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-8"
+            >
+              <a 
+                href="#" 
+                className="inline-flex items-center justify-center px-6 py-3 text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300"
+              >
+                Get Started Free
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </a>
+              <a 
+                href="#features" 
+                className="inline-flex items-center justify-center px-6 py-3 text-base font-medium text-indigo-600 dark:text-indigo-400 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg border border-indigo-200 dark:border-indigo-800 shadow-sm hover:shadow-md transition-all duration-300"
+              >
+                See How It Works
+              </a>
+            </motion.div>
+
+            {/* Social Proof */}
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.6 }}
+              className="flex flex-wrap justify-center lg:justify-start gap-6 items-center pt-4 border-t border-gray-200 dark:border-gray-800"
             >
               <div className="flex items-center">
-                {/* Star icons */}
-                <div className="flex mr-2 relative">
-                  {[1, 2, 3, 4, 5].map((_, index) => (
-                    <div key={index} className="relative">
-                      <Star 
-                        size={20} 
-                        className={`${index < Math.floor(currentRating) ? 'text-yellow-400 fill-yellow-400' : index < Math.ceil(currentRating) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'} mx-0.5`} 
+                <div className="flex -space-x-2">
+                  {[...Array(5)].map((_, i) => (
+                    <div key={i} className="inline-block h-8 w-8 rounded-full ring-2 ring-white dark:ring-gray-800 overflow-hidden bg-gray-200 dark:bg-gray-700">
+                      <Image 
+                        src={`/avatar-${i+1}.png`} 
+                        alt={`User ${i+1}`} 
+                        width={32} 
+                        height={32}
+                        className="h-full w-full object-cover"
                       />
-                      
-                      {/* Partially filled star */}
-                      {index === Math.floor(currentRating) && currentRating % 1 !== 0 && (
-                        <div 
-                          className="absolute inset-0 overflow-hidden" 
-                          style={{ width: `${(currentRating % 1) * 100}%` }}
-                        >
-                          <Star size={20} className="text-yellow-400 fill-yellow-400 mx-0.5" />
-                        </div>
-                      )}
                     </div>
                   ))}
-                  
-                  {/* Glowing effect when stars appear */}
-                  {showStars && (
-                    <motion.div 
-                      className="absolute inset-0 z-[-1]"
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ 
-                        opacity: [0, 0.7, 0],
-                        scale: [0.8, 1.2, 1.5]
-                      }}
-                      transition={{ 
-                        duration: 1.5,
-                        times: [0, 0.3, 1]
-                      }}
-                    >
-                      <div className="absolute inset-0 bg-yellow-400 blur-md rounded-full" />
-                    </motion.div>
-                  )}
-                  
-                  {/* Bang effect */}
-                  {showBang && (
-                    <motion.div
-                      className="absolute inset-0 z-[1] pointer-events-none"
-                      initial={{ scale: 0, opacity: 0 }}
-                      animate={{ 
-                        scale: [0, 1.5, 2],
-                        opacity: [0, 1, 0]
-                      }}
-                      transition={{ 
-                        duration: 0.7,
-                        ease: "easeOut"
-                      }}
-                    >
-                      {/* Radiating circles */}
-                      <div className="absolute inset-0 border-2 border-yellow-400 rounded-full" />
-                      
-                      {/* Star particles */}
-                      {[...Array(8)].map((_, i) => (
-                        <motion.div
-                          key={i}
-                          className="absolute w-1.5 h-1.5 bg-yellow-400 rounded-full"
-                          style={{
-                            left: '50%',
-                            top: '50%',
-                          }}
-                          animate={{
-                            x: [0, Math.cos(i * Math.PI/4) * 60],
-                            y: [0, Math.sin(i * Math.PI/4) * 60],
-                            opacity: [1, 0],
-                            scale: [1, 0]
-                          }}
-                          transition={{
-                            duration: 0.7,
-                            ease: "easeOut"
-                          }}
-                        />
-                      ))}
-                    </motion.div>
-                  )}
-                  
-                  {/* Shine effect */}
-                  {showShine && (
-                    <motion.div
-                      className="absolute inset-0 overflow-hidden"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: [0, 1, 0] }}
-                      transition={{ 
-                        duration: 1.2,
-                        times: [0, 0.2, 1]
-                      }}
-                    >
-                      <motion.div
-                        className="absolute inset-0 z-10"
-                        initial={{ 
-                          background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0) 0%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0) 100%)",
-                          left: "-100%"
-                        }}
-                        animate={{
-                          left: ["0%", "200%"]
-                        }}
-                        transition={{
-                          duration: 1,
-                          ease: "easeOut",
-                        }}
-                      />
-                    </motion.div>
-                  )}
                 </div>
-                
-                {/* Animated rating number */}
-                <motion.div 
-                  className="font-semibold text-gray-900 dark:text-white"
-                  animate={isRolling ? { scale: [1, 1.1, 1] } : {}}
-                  transition={{ 
-                    repeat: isRolling ? Infinity : 0,
-                    duration: 0.5
-                  }}
-                >
-                  <span className={`transition-all duration-200 ${showShine ? 'text-yellow-500 text-xl' : 'text-gray-900 dark:text-white'}`}>
-                    {currentRating.toFixed(1)}
-                  </span>
-                  <span className="text-sm text-gray-600 dark:text-gray-400 ml-1">
-                    from our students
-                  </span>
-                </motion.div>
+                <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">
+                  Trusted by students worldwide
+                </span>
+              </div>
+              
+              <div className="flex space-x-6">
+                {socialProofMetrics.map((metric, index) => (
+                  <div key={index} className="text-center">
+                    <div className="text-xl font-bold text-gray-900 dark:text-white">{metric.value}</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">{metric.label}</div>
+                  </div>
+                ))}
               </div>
             </motion.div>
-          </motion.div>
-        </motion.div>
+          </div>
 
-        <motion.div
-          className="relative z-10 flex justify-center"
-          style={{
-            perspective: '1000px',
-          }}
-        >
-          <motion.div
-            className="relative"
+          {/* Right column - Interactive Demo */}
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ 
+              duration: 0.5,
+              delay: 0.3,
+              type: "spring",
+              stiffness: 100,
+              damping: 15
+            }}
+            className="flex-1 w-full max-w-xl mx-auto lg:mx-0"
+            ref={inViewRef}
             style={{
               transform: `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(${cardScale})`,
-              transition: 'transform 0.2s ease-out',
+              transition: 'transform 0.3s ease-out',
             }}
-            variants={imageVariants}
-            initial="hidden"
-            animate={inView ? "visible" : "hidden"}
           >
-            <div className="relative w-full max-w-lg mx-auto">
-              <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-indigo-500 to-purple-600 transform translate-y-4 translate-x-4 rotate-3 opacity-20 blur-xl" />
-              
-              {/* Chat UI Card with Animation */}
-              <div className="relative glass-card rounded-3xl w-full shadow-xl overflow-hidden">
-                {/* macOS window controls */}
-                <div className="absolute top-4 left-4 flex items-center space-x-2 z-10">
-                  <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                  <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+            {/* Demo UI container */}
+            <div className="relative mx-auto w-full overflow-hidden rounded-xl bg-white dark:bg-gray-800 shadow-2xl border border-gray-200 dark:border-gray-700">
+              {/* Header */}
+              <div className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-4 flex items-center justify-between">
+                <div className="flex items-center">
+                  <Brain className="h-6 w-6 text-indigo-600 dark:text-indigo-400 mr-2" />
+                  <h3 className="font-medium text-gray-900 dark:text-white">StudyAI Assistant</h3>
                 </div>
-                
-                {/* Cursor Animation - ensured it doesn't get cut off while maintaining consistent size */}
-                <motion.div 
-                  className="absolute w-12 h-12 z-[100] pointer-events-none"
-                  style={{ 
-                    willChange: "transform",
-                    transformOrigin: "12px 0px", // Align with the pointer tip
-                    overflow: "visible", // Ensure it doesn't get cut off
-                    filter: "drop-shadow(0 0 1px rgba(0,0,0,0.3))" // Add subtle shadow for better visibility
-                  }}
-                  initial={{ opacity: 0 }}
-                  animate={
-                    // Send button or input field click animation with enlarge-then-shrink effect
-                    (animationStage === 3 && cursorPosition.x > 400) || (animationStage === 2 && cursorPosition.x < 300)
-                    ? {
-                      opacity: 1,
-                      x: cursorPosition.x - 8,
-                      y: cursorPosition.y - 8,
-                      scale: [1, 1.05, 0.9, 1], // Subtle enlarge then click effect, then back to normal
-                      transition: {
-                        scale: {
-                          times: [0, 0.2, 0.5, 0.8], // Precise timing for each phase
-                          duration: 0.6, // Total animation duration
-                        }
-                      }
-                    } 
-                    : // Default animation
-                    {
-                      opacity: animationStage === 0 ? 0 : 1,
-                      x: cursorPosition.x - 8,
-                      y: cursorPosition.y - 8,
-                      scale: 1,
-                    }
-                  }
-                  transition={{ 
-                    x: { type: "spring", duration: 1.5, bounce: 0.1 },
-                    y: { type: "spring", duration: 1.5, bounce: 0.1 },
-                    opacity: { duration: 0.2 }
-                  }}
-                >
-                  <img 
-                    src="https://help.apple.com/assets/674E245FBF37DF041803DF82/674E2467BF37DF041803DFAD/en_US/a0d5e859e5f2b01dbbf81dfc38a3a92f.png" 
-                    alt="Cursor"
-                    className="w-full h-full object-contain"
+                <div className="flex space-x-1">
+                  <div className="h-2.5 w-2.5 rounded-full bg-red-500"></div>
+                  <div className="h-2.5 w-2.5 rounded-full bg-yellow-500"></div>
+                  <div className="h-2.5 w-2.5 rounded-full bg-green-500"></div>
+                </div>
+              </div>
+
+              {/* Chat container */}
+              <div 
+                ref={chatContainerRef}
+                className="h-96 overflow-y-auto p-4 space-y-4"
+              >
+                {/* Welcome message */}
+                <div className="flex items-start">
+                  <div className="flex-shrink-0 h-9 w-9 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
+                    <Brain className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+                  </div>
+                  <div className="ml-3 bg-gray-100 dark:bg-gray-700 rounded-lg p-3 max-w-[80%]">
+                    <p className="text-sm text-gray-800 dark:text-gray-200">
+                      Hi there! I'm your StudyAI assistant. Ask me anything about your studies, and I'll help you understand any concept.
+                    </p>
+                  </div>
+                </div>
+
+                {/* User question */}
+                {typedText && (
+                  <div className="flex items-start justify-end">
+                    <div className="mr-3 bg-indigo-600 text-white rounded-lg p-3 max-w-[80%]">
+                      <p className="text-sm">
+                        {typedText}
+                        {showInputCursor && <span className="inline-block w-1.5 h-4 bg-white ml-0.5 animate-blink"></span>}
+                      </p>
+                    </div>
+                    <div className="flex-shrink-0 h-9 w-9 rounded-full bg-gray-300 dark:bg-gray-600 overflow-hidden">
+                      <Image 
+                        src="/avatar-user.png" 
+                        alt="User" 
+                        width={36} 
+                        height={36}
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* AI typing indicator */}
+                {showTypingIndicator && (
+                  <div className="flex items-start">
+                    <div className="flex-shrink-0 h-9 w-9 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
+                      <Brain className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+                    </div>
+                    <div className="ml-3 bg-gray-100 dark:bg-gray-700 rounded-lg p-3">
+                      <div className="flex space-x-1">
+                        <div className="w-2 h-2 rounded-full bg-gray-400 dark:bg-gray-500 animate-bounce"></div>
+                        <div className="w-2 h-2 rounded-full bg-gray-400 dark:bg-gray-500 animate-bounce animation-delay-200"></div>
+                        <div className="w-2 h-2 rounded-full bg-gray-400 dark:bg-gray-500 animate-bounce animation-delay-400"></div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* AI response */}
+                {showAIResponse && (
+                  <div className="flex items-start">
+                    <div className="flex-shrink-0 h-9 w-9 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
+                      <Brain className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+                    </div>
+                    <div className="ml-3 bg-gray-100 dark:bg-gray-700 rounded-lg p-3 max-w-[80%]">
+                      <p className="text-sm text-gray-800 dark:text-gray-200 mb-2">
+                        {questionsAndAnswers[currentQAIndex].answer.text}
+                      </p>
+                      <ul className="space-y-1">
+                        {questionsAndAnswers[currentQAIndex].answer.bullets.map((bullet, idx) => (
+                          <li key={idx} className="flex items-start text-sm text-gray-800 dark:text-gray-200">
+                            <Check className="h-4 w-4 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                            <span>{bullet}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Input area */}
+              <div className="border-t border-gray-200 dark:border-gray-700 p-3 bg-gray-50 dark:bg-gray-800">
+                <div className="relative flex items-center">
+                  <input
+                    type="text"
+                    placeholder="Ask any study question..."
+                    value={inputFieldText}
+                    readOnly
+                    className="flex-1 py-2 pl-4 pr-10 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                   />
-                </motion.div>
-                
-                {/* Chat Interface - Added overflow: 'visible' to parent to ensure cursor isn't cut off */}
-                <div className="relative bg-white dark:bg-gray-800 rounded-lg overflow-visible shadow-sm m-6 h-[400px] flex flex-col">
-                  {/* Header */}
-                  <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700 flex items-center">
-                    <Brain className="h-4 w-4 text-indigo-600 mr-2" />
-                    <span className="text-sm font-medium">Study Assistant</span>
-                  </div>
-                  
-                  {/* Chat Messages - Add ref for scrolling */}
-                  <div ref={chatContainerRef} className="flex-1 overflow-y-auto p-4">
-                    <div className="flex flex-col space-y-4">
-                      {/* Initial AI Message */}
-                      <div className="flex items-start">
-                        <div className="w-8 h-8 bg-indigo-100 dark:bg-indigo-900/30 rounded-full flex items-center justify-center text-indigo-600 mr-3 mt-1">
-                          <span className="text-sm font-bold">AI</span>
-                        </div>
-                        <div className="flex-1 bg-gray-100 dark:bg-gray-700/50 rounded-2xl p-3">
-                          <p className="text-sm">How would you like me to help with your biology exam today?</p>
-                        </div>
-                      </div>
-                      
-                      {/* User Message 1 */}
-                      <div className="flex items-start justify-end">
-                        <div className="flex-1 bg-indigo-500 rounded-2xl p-3 ml-10 text-white">
-                          <p className="text-sm">I need help with cellular respiration concepts.</p>
-                        </div>
-                      </div>
-                      
-                      {/* AI Response 1 */}
-                      <div className="flex items-start">
-                        <div className="w-8 h-8 bg-indigo-100 dark:bg-indigo-900/30 rounded-full flex items-center justify-center text-indigo-600 mr-3 mt-1">
-                          <span className="text-sm font-bold">AI</span>
-                        </div>
-                        <div className="flex-1 bg-gray-100 dark:bg-gray-700/50 rounded-2xl p-3">
-                          <p className="text-sm">Cellular respiration is the process where cells convert nutrients into energy (ATP). I'll create a study guide with key concepts:</p>
-                          <ul className="mt-2 text-sm list-disc list-inside space-y-1">
-                            <li>Glycolysis process and outputs</li>
-                            <li>Krebs cycle steps and products</li>
-                            <li>Electron transport chain function</li>
-                            <li>ATP synthesis mechanism</li>
-                          </ul>
-                        </div>
-                      </div>
-                      
-                      {/* Animated User Message */}
-                      {typedText.length > 0 && animationStage >= 3 && (
-                        <motion.div 
-                          className="flex items-start justify-end"
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ 
-                            duration: 0.4, 
-                            ease: "easeOut" 
-                          }}
-                        >
-                          <div className="flex-1 bg-indigo-500 rounded-2xl p-3 ml-10 text-white">
-                            <p className="text-sm">
-                              {typedText}
-                            </p>
-                          </div>
-                        </motion.div>
-                      )}
-                      
-                      {/* Typing Indicator */}
-                      {showTypingIndicator && (
-                        <motion.div 
-                          className="flex items-start"
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ 
-                            duration: 0.4, 
-                            ease: "easeOut" 
-                          }}
-                        >
-                          <div className="w-8 h-8 bg-indigo-100 dark:bg-indigo-900/30 rounded-full flex items-center justify-center text-indigo-600 mr-3 mt-1">
-                            <span className="text-sm font-bold">AI</span>
-                          </div>
-                          <div className="min-w-[42px] max-w-[60px] bg-gray-100 dark:bg-gray-700/50 rounded-full py-2 px-3">
-                            <div className="flex space-x-1.5 justify-center items-center">
-                              <div className="w-1.5 h-1.5 bg-gray-500 dark:bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }}></div>
-                              <div className="w-1.5 h-1.5 bg-gray-500 dark:bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }}></div>
-                              <div className="w-1.5 h-1.5 bg-gray-500 dark:bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }}></div>
-                            </div>
-                          </div>
-                        </motion.div>
-                      )}
-                      
-                      {/* Animated AI Response - Dynamic based on current question */}
-                      {showAIResponse && (
-                        <motion.div 
-                          className="flex items-start"
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ 
-                            duration: 0.5, 
-                            ease: "easeOut" 
-                          }}
-                        >
-                          <div className="w-8 h-8 bg-indigo-100 dark:bg-indigo-900/30 rounded-full flex items-center justify-center text-indigo-600 mr-3 mt-1">
-                            <span className="text-sm font-bold">AI</span>
-                          </div>
-                          <div className="flex-1 bg-gray-100 dark:bg-gray-700/50 rounded-2xl p-3">
-                            <p className="text-sm">{questionsAndAnswers[currentQAIndex].answer.text}</p>
-                            <ul className="mt-2 text-sm list-disc list-inside space-y-1">
-                              {questionsAndAnswers[currentQAIndex].answer.bullets.map((bullet, index) => (
-                                <li key={index}>{bullet}</li>
-                              ))}
-                            </ul>
-                          </div>
-                        </motion.div>
-                      )}
-                    </div>
-                  </div>
-                  
-                  {/* Input Area - added z-index to ensure it's below the cursor */}
-                  <div className="p-3 border-t border-gray-100 dark:border-gray-700 relative z-10">
-                    <div className="relative flex">
-                      <div className="flex-1 bg-gray-100 dark:bg-gray-700 rounded-lg px-4 py-2 pr-10 min-h-[36px]">
-                        {animationStage === 2 ? (
-                          <span className="text-sm">
-                            {inputFieldText}
-                            {showInputCursor && <span className="inline-block h-4 w-0.5 bg-gray-500 dark:bg-gray-400 ml-0.5 animate-blink"></span>}
-                          </span>
-                        ) : (
-                          <span className="text-sm text-gray-500 dark:text-gray-400">Type something here...</span>
-                        )}
-                      </div>
-                      <button 
-                        className={`absolute right-1 top-1/2 transform -translate-y-1/2 text-indigo-500 dark:text-indigo-400 p-1.5 bg-indigo-500 bg-opacity-20 rounded-lg hover:bg-opacity-30 transition-all ${animationStage === 3 && !typedText ? 'scale-90' : ''}`}
-                        style={{ transition: 'transform 0.1s ease-in-out' }} // Smooth transition for click effect
-                      >
-                        <Send size={18} /> {/* Slightly larger send icon for easier targeting */}
-                      </button>
-                    </div>
-                  </div>
+                  <button className="absolute right-3 text-indigo-600 hover:text-indigo-700 dark:text-indigo-400">
+                    <Send className="h-5 w-5" />
+                  </button>
                 </div>
               </div>
             </div>
-            
-            {/* Floating educational icons - repositioned and resized without containers */}
-            <motion.div 
-              className="absolute top-[-40px] right-[-50px]"
-              variants={shapeVariants}
-              initial="hidden"
-              animate={inView ? "visible" : "hidden"}
-              style={{ transformStyle: 'preserve-3d', zIndex: 1 }}
-              whileHover={{ scale: 1.1, rotate: 5 }}
-            >
-              <motion.div
-                animate={{
-                  rotate: [0, -5, 5, 0],
-                  scale: [1, 1.05, 1, 1.05, 1]
-                }}
-                transition={{
-                  duration: 5,
-                  ease: "easeInOut",
-                  repeat: Infinity,
-                  repeatType: "loop"
-                }}
-              >
-                <GraduationCap size={42} className="text-indigo-600 dark:text-indigo-400" />
-              </motion.div>
-            </motion.div>
-            
-            <motion.div 
-              className="absolute bottom-[-60px] left-[-50px]"
-              variants={shapeVariants}
-              initial="hidden"
-              animate={inView ? "visible" : "hidden"}
-              style={{ transformStyle: 'preserve-3d', zIndex: 1 }}
-              whileHover={{ scale: 1.1, rotate: -5 }}
-            >
-              <motion.div
-                animate={{
-                  y: [0, -5, 0],
-                  rotate: [0, 3, 0, -3, 0]
-                }}
-                transition={{
-                  duration: 4,
-                  ease: "easeInOut",
-                  repeat: Infinity,
-                  repeatType: "loop"
-                }}
-              >
-                <BookOpen size={46} className="text-purple-600 dark:text-purple-400" />
-              </motion.div>
-            </motion.div>
-            
-            <motion.div 
-              className="absolute top-[100px] left-[-70px]"
-              variants={shapeVariants}
-              initial="hidden"
-              animate={inView ? "visible" : "hidden"}
-              style={{ transformStyle: 'preserve-3d', zIndex: 1 }}
-              whileHover={{ scale: 1.1, rotate: 5 }}
-            >
-              <motion.div
-                animate={{
-                  scale: [1, 1.1, 1],
-                  rotate: [0, -5, 5, 0]
-                }}
-                transition={{
-                  duration: 6,
-                  ease: "easeInOut",
-                  repeat: Infinity,
-                  repeatType: "loop"
-                }}
-              >
-                <BookText size={38} className="text-blue-600 dark:text-blue-400" />
-              </motion.div>
-            </motion.div>
-
-            {/* Additional educational icons */}
-            <motion.div 
-              className="absolute bottom-[60px] right-[-50px]"
-              variants={shapeVariants}
-              initial="hidden"
-              animate={inView ? "visible" : "hidden"}
-              style={{ transformStyle: 'preserve-3d', zIndex: 1 }}
-              whileHover={{ scale: 1.1, rotate: -5 }}
-            >
-              <motion.div
-                animate={{
-                  rotate: [0, 5, -5, 5, 0],
-                  scale: [1, 1.08, 1]
-                }}
-                transition={{
-                  duration: 7,
-                  ease: "easeInOut",
-                  repeat: Infinity,
-                  repeatType: "loop"
-                }}
-              >
-                <Calculator size={36} className="text-purple-800 dark:text-purple-600" />
-              </motion.div>
-            </motion.div>
           </motion.div>
-        </motion.div>
+        </div>
       </div>
-    </section>
+    </div>
   );
 }
 
