@@ -11,6 +11,7 @@ export type UserProfile = {
   display_name?: string;
   avatar_url?: string;
   email?: string;
+  phone?: string;
 };
 
 type AuthContextType = {
