@@ -19,17 +19,17 @@ export default function HelpWidget() {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50">
-      {/* Launcher button */}
+    <div className="fixed bottom-6 right-6 z-[9999]">
+      {/* Launcher button - Made larger and more noticeable */}
       <button 
         onClick={toggleWidget}
-        className="w-14 h-14 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 focus:outline-none"
+        className="w-16 h-16 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 text-white flex items-center justify-center shadow-xl hover:shadow-2xl transition-all duration-300 focus:outline-none border-2 border-white dark:border-gray-800 animate-pulse"
         aria-label="Help and support"
       >
         {isOpen ? (
-          <X className="w-6 h-6" />
+          <X className="w-8 h-8" />
         ) : (
-          <MessageSquare className="w-6 h-6" />
+          <MessageSquare className="w-8 h-8" />
         )}
       </button>
 
