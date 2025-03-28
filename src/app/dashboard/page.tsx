@@ -38,7 +38,7 @@ const DEFAULT_SUBJECT_DISTRIBUTION = [
 
 export default function DashboardPage() {
   const { user, userProfile, refreshProfile } = useAuth();
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   
   // State for real data
@@ -314,58 +314,32 @@ export default function DashboardPage() {
   };
   
   useEffect(() => {
-    // Load user profile and data
+    // Load data in background without showing loading state
     const loadData = async () => {
       try {
-        setIsLoading(true);
-        setLoadError(null);
-        
-        // Set a loading timeout to prevent infinite loading - max 2 seconds
-        const timeoutId = setTimeout(() => {
-          console.log('Loading timed out after 2 seconds');
-          setIsLoading(false);
-        }, 2000);
-        
+        // Don't show loading state, just load data in background
         if (user) {
-          try {
-            await refreshProfile();
-          } catch (profileError) {
-            console.error("Error refreshing profile:", profileError);
-            // Continue even if profile refresh fails
-          }
+          // Try to refresh profile but don't wait for it
+          refreshProfile().catch(e => console.error("Profile refresh error:", e));
           
-          // Fetch all data in parallel and catch errors for each
+          // Fetch all data in parallel and don't block UI
           Promise.allSettled([
             fetchStudyTimeData().catch(e => console.error("Study time data error:", e)),
             fetchSubjectDistribution().catch(e => console.error("Subject distribution error:", e)),
             fetchRecentActivities().catch(e => console.error("Recent activities error:", e)),
             fetchUpcomingTasks().catch(e => console.error("Upcoming tasks error:", e)),
-          ]).finally(() => {
-            // Ensure loading is set to false when all promises settle
-            clearTimeout(timeoutId);
-            setIsLoading(false);
-          });
-          
-          // Fetch stats - don't await this to prevent loading delays
-          fetchStats().catch(e => console.error("Stats error:", e));
-        } else {
-          // No user, clear timeout and stop loading
-          clearTimeout(timeoutId);
-          setIsLoading(false);
+            fetchStats().catch(e => console.error("Stats error:", e))
+          ]);
         }
       } catch (error: any) {
         console.error("Error loading data:", error);
-        
-        if (error?.message?.includes('relation') || error?.code === '42P01') {
-          setLoadError(`Some database tables may be missing. The dashboard will still work with default data.`);
-        } else {
-          setLoadError("Failed to load all dashboard data. Some sections may show default values.");
-        }
-        setIsLoading(false);
       }
     };
     
+    // Load data without blocking UI
     loadData();
+    
+    // Even if no user is signed in, we should display the page with default data
   }, [user, refreshProfile]);
 
   // Helper function to format relative time
@@ -395,42 +369,6 @@ export default function DashboardPage() {
     
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
-  
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-full min-h-[500px]">
-        <div className="text-center">
-          <Loader2 size={40} className="animate-spin text-indigo-600 dark:text-indigo-400 mx-auto mb-4" />
-          <p className="text-gray-600 dark:text-gray-400">Loading your dashboard...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (loadError) {
-    return (
-      <div className="p-6">
-        <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-          <div className="text-center mb-4">
-            <AlertTriangle size={40} className="text-yellow-500 dark:text-yellow-400 mx-auto mb-4" />
-            <h2 className="text-lg font-medium text-yellow-600 dark:text-yellow-400 mb-2">Dashboard Notice</h2>
-            <p className="text-gray-600 dark:text-gray-300 mb-4">{loadError}</p>
-          </div>
-          <div className="text-center">
-            <p className="mb-4 text-gray-600 dark:text-gray-400">
-              You can continue using the dashboard with sample data while we set up your personal data.
-            </p>
-            <button
-              onClick={() => window.location.reload()}
-              className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
-            >
-              Continue to Dashboard
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="p-6">

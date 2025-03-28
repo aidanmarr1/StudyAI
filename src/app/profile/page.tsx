@@ -42,12 +42,19 @@ const achievements = [
   },
 ];
 
+// Default stats to use when data is not available
+const DEFAULT_USER_STATS = {
+  studyHours: 0,
+  flashcardCount: 0,
+  currentStreak: 0
+};
+
 export default function ProfilePage() {
   const { user, userProfile, updateProfile, uploadAvatar, refreshProfile } = useAuth();
   
   const [username, setUsername] = useState('');
   const [displayName, setDisplayName] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
@@ -60,6 +67,8 @@ export default function ProfilePage() {
     showPhone: false,
     activityVisible: true
   });
+  // Stats with default values to prevent undefined errors
+  const [userStats, setUserStats] = useState(DEFAULT_USER_STATS);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   
@@ -69,53 +78,22 @@ export default function ProfilePage() {
       setUsername(userProfile.username || '');
       setDisplayName(userProfile.display_name || '');
       setAvatarUrl(userProfile.avatar_url || null);
-      setIsLoading(false);
     }
   }, [userProfile]);
   
-  // Load profile on mount
+  // Load profile on mount - but don't wait for it
   useEffect(() => {
-    // Add a timeout to prevent infinite loading - max 2 seconds
-    const loadTimeout = setTimeout(() => {
-      console.log('Profile loading timed out after 2 seconds');
-      setIsLoading(false);
-    }, 2000);
-    
+    // No loading state - load profile data in background 
     const loadProfile = async () => {
-      try {
-        setIsLoading(true);
-        setMessage(null);
-        if (typeof setError === 'function') {
-          setError(null);
-        }
-        
-        if (user) {
-          try {
-            // Don't await this to avoid long loading times
-            refreshProfile().catch(err => {
-              console.error('Error refreshing profile:', err);
-            });
-            
-            // Set a short timeout for any profile data to load
-            setTimeout(() => {
-              setIsLoading(false);
-            }, 1000);
-          } catch (err) {
-            console.error('Error in profile loading:', err);
-            setIsLoading(false);
-          }
-        } else {
-          setIsLoading(false);
-        }
-      } catch (err) {
-        console.error('Error in profile loading:', err);
-        setIsLoading(false);
+      if (user) {
+        // Just try to refresh profile, don't block the UI
+        refreshProfile().catch(err => {
+          console.error('Error refreshing profile:', err);
+        });
       }
     };
     
     loadProfile();
-    
-    return () => clearTimeout(loadTimeout);
   }, [user, refreshProfile]);
   
   // Handle avatar file selection
@@ -267,18 +245,7 @@ export default function ProfilePage() {
   // Get earned badges count
   const earnedBadgesCount = achievements.filter(badge => badge.earned).length;
   
-  // Show loading state while user profile is loading
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <Loader2 className="w-10 h-10 text-indigo-600 animate-spin mx-auto mb-4" />
-          <p className="text-gray-600">Loading profile...</p>
-        </div>
-      </div>
-    );
-  }
-  
+  // If user is not signed in, show sign-in prompt
   if (!user) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -320,7 +287,10 @@ export default function ProfilePage() {
             {/* Profile header */}
             <div className="px-6 py-8 sm:px-8 border-b border-gray-200 dark:border-gray-700">
               <div className="flex flex-col sm:flex-row items-center">
-                <div className="relative w-24 h-24 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700 flex-shrink-0 mb-4 sm:mb-0">
+                <div 
+                  className="relative w-24 h-24 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700 flex-shrink-0 mb-4 sm:mb-0 cursor-pointer"
+                  onClick={handleAvatarClick}
+                >
                   {avatarUrl ? (
                     <Image
                       src={avatarUrl}
@@ -335,18 +305,30 @@ export default function ProfilePage() {
                       </span>
                     </div>
                   )}
+                  <div className="absolute inset-0 bg-black bg-opacity-20 opacity-0 hover:opacity-100 flex items-center justify-center transition-opacity">
+                    <Edit className="h-6 w-6 text-white" />
+                  </div>
                 </div>
+                
+                <input 
+                  type="file"
+                  ref={fileInputRef}
+                  accept="image/*"
+                  onChange={handleAvatarChange}
+                  className="hidden"
+                />
+                
                 <div className="sm:ml-6 text-center sm:text-left">
                   <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {displayName || username || 'User'}
+                    {displayName || username || (user?.email ? user.email.split('@')[0] : 'User')}
                   </h1>
-                  <p className="text-gray-500 dark:text-gray-400 mt-1">{user.email}</p>
+                  <p className="text-gray-500 dark:text-gray-400 mt-1">{user?.email || ''}</p>
                   <div className="mt-2 flex flex-wrap justify-center sm:justify-start">
                     <span className="bg-indigo-100 text-indigo-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-indigo-900 dark:text-indigo-300 mr-2 mb-2">
                       Premium Member
                     </span>
                     <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300 mr-2 mb-2">
-                      Active Streak: {userProfile?.streak_days || 0} days
+                      Active Streak: {userStats.currentStreak} days
                     </span>
                   </div>
                 </div>
@@ -367,7 +349,7 @@ export default function ProfilePage() {
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Email</h3>
-                  <p className="mt-1 text-sm text-gray-900 dark:text-white">{user.email}</p>
+                  <p className="mt-1 text-sm text-gray-900 dark:text-white">{user?.email || 'Not available'}</p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Account Type</h3>
@@ -376,8 +358,8 @@ export default function ProfilePage() {
                 <div>
                   <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Member Since</h3>
                   <p className="mt-1 text-sm text-gray-900 dark:text-white">
-                    {userProfile?.created_at 
-                      ? new Date(userProfile.created_at).toLocaleDateString('en-US', {
+                    {user?.created_at 
+                      ? new Date(user.created_at).toLocaleDateString('en-US', {
                           year: 'numeric',
                           month: 'long',
                           day: 'numeric'
@@ -392,8 +374,8 @@ export default function ProfilePage() {
                 <div>
                   <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Last Login</h3>
                   <p className="mt-1 text-sm text-gray-900 dark:text-white">
-                    {userProfile?.last_sign_in 
-                      ? new Date(userProfile.last_sign_in).toLocaleDateString('en-US', {
+                    {user?.last_sign_in_at 
+                      ? new Date(user.last_sign_in_at).toLocaleDateString('en-US', {
                           year: 'numeric',
                           month: 'long',
                           day: 'numeric',
@@ -418,15 +400,15 @@ export default function ProfilePage() {
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                 <div className="bg-indigo-50 dark:bg-indigo-900/30 p-4 rounded-lg">
                   <h3 className="text-sm font-medium text-indigo-800 dark:text-indigo-300">Total Study Hours</h3>
-                  <p className="mt-1 text-2xl font-semibold text-indigo-900 dark:text-indigo-100">{userProfile?.total_study_hours || 0}</p>
+                  <p className="mt-1 text-2xl font-semibold text-indigo-900 dark:text-indigo-100">{userStats.studyHours}</p>
                 </div>
                 <div className="bg-purple-50 dark:bg-purple-900/30 p-4 rounded-lg">
                   <h3 className="text-sm font-medium text-purple-800 dark:text-purple-300">Flashcards Created</h3>
-                  <p className="mt-1 text-2xl font-semibold text-purple-900 dark:text-purple-100">{userProfile?.flashcards_created || 0}</p>
+                  <p className="mt-1 text-2xl font-semibold text-purple-900 dark:text-purple-100">{userStats.flashcardCount}</p>
                 </div>
                 <div className="bg-green-50 dark:bg-green-900/30 p-4 rounded-lg">
                   <h3 className="text-sm font-medium text-green-800 dark:text-green-300">Achievements Earned</h3>
-                  <p className="mt-1 text-2xl font-semibold text-green-900 dark:text-green-100">{userProfile?.achievements_count || 0}</p>
+                  <p className="mt-1 text-2xl font-semibold text-green-900 dark:text-green-100">{earnedBadgesCount}</p>
                 </div>
               </div>
             </div>
@@ -434,12 +416,12 @@ export default function ProfilePage() {
             {/* Actions */}
             <div className="px-6 py-6 sm:px-8 border-t border-gray-200 dark:border-gray-700">
               <div className="flex flex-col sm:flex-row sm:justify-end space-y-3 sm:space-y-0 sm:space-x-3">
-                <a 
-                  href="/settings" 
+                <button 
+                  onClick={() => setActiveTab('general')}
                   className="px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-600"
                 >
                   Edit Profile
-                </a>
+                </button>
                 <a 
                   href="/dashboard" 
                   className="px-4 py-2 bg-indigo-600 rounded-md text-sm font-medium text-white hover:bg-indigo-700"
