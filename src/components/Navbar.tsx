@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Menu, X, Moon, Sun, Sparkles, Brain, LogIn, UserCircle, LogOut } from "lucide-react";
+import { Menu, X, Moon, Sun, Sparkles, LogIn, UserCircle, LogOut } from "lucide-react";
 import { motion, useSpring } from "framer-motion";
 import { useTheme } from "./ThemeProvider";
 import { useAuth } from "../utils/AuthContext";

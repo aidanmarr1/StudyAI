@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { BookOpen, Brain, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -73,7 +74,16 @@ const Footer = () => {
               <div className="relative w-10 h-10 flex items-center justify-center">
                 <div className="absolute w-full h-full bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg rotate-6 group-hover:rotate-12 transition-transform duration-300"></div>
                 <div className="absolute w-full h-full bg-gradient-to-tr from-indigo-600 to-blue-500 rounded-lg -rotate-6 group-hover:-rotate-12 transition-transform duration-300"></div>
-                <Brain className="w-6 h-6 text-white relative z-10" />
+                <div className="relative z-10 w-7 h-7">
+                  <Image 
+                    src="https://i.ibb.co/x8csBSph/robot.png" 
+                    alt="StudyAI Robot Logo"
+                    width={28}
+                    height={28}
+                    className="object-contain"
+                    unoptimized={true}
+                  />
+                </div>
               </div>
               <span className="font-bold text-2xl bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-purple-600 dark:from-indigo-400 dark:to-purple-400">
                 StudyAI
