@@ -19,14 +19,31 @@ import { supabase } from '../../utils/supabase';
 // Color palette for charts
 const COLORS = ['#6366F1', '#8B5CF6', '#EC4899', '#F59E0B', '#10B981'];
 
+// Default data for when DB tables don't exist or fetch fails
+const DEFAULT_STUDY_TIME_DATA = [
+  { day: 'Mon', hours: 0 },
+  { day: 'Tue', hours: 0 },
+  { day: 'Wed', hours: 0 },
+  { day: 'Thu', hours: 0 },
+  { day: 'Fri', hours: 0 },
+  { day: 'Sat', hours: 0 },
+  { day: 'Sun', hours: 0 },
+];
+
+const DEFAULT_SUBJECT_DISTRIBUTION = [
+  { name: 'Math', value: 1 },
+  { name: 'Science', value: 1 },
+  { name: 'English', value: 1 },
+];
+
 export default function DashboardPage() {
   const { user, userProfile, refreshProfile } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   
   // State for real data
-  const [studyTimeData, setStudyTimeData] = useState<any[]>([]);
-  const [subjectDistribution, setSubjectDistribution] = useState<any[]>([]);
+  const [studyTimeData, setStudyTimeData] = useState<any[]>(DEFAULT_STUDY_TIME_DATA);
+  const [subjectDistribution, setSubjectDistribution] = useState<any[]>(DEFAULT_SUBJECT_DISTRIBUTION);
   const [recentActivities, setRecentActivities] = useState<any[]>([]);
   const [upcomingTasks, setUpcomingTasks] = useState<any[]>([]);
   const [stats, setStats] = useState({
@@ -47,7 +64,15 @@ export default function DashboardPage() {
         .order('created_at', { ascending: false })
         .limit(7);
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching study time data:', error);
+        if (error.code === '42P01') {
+          // Table doesn't exist, use default data
+          console.log('study_sessions table does not exist, using default data');
+          return;
+        }
+        throw error;
+      }
       
       if (data && data.length > 0) {
         // Process data to get daily study hours for the past week
@@ -73,30 +98,10 @@ export default function DashboardPage() {
         });
         
         setStudyTimeData(formattedData);
-      } else {
-        // Set default data if no study sessions found
-        setStudyTimeData([
-          { day: 'Mon', hours: 0 },
-          { day: 'Tue', hours: 0 },
-          { day: 'Wed', hours: 0 },
-          { day: 'Thu', hours: 0 },
-          { day: 'Fri', hours: 0 },
-          { day: 'Sat', hours: 0 },
-          { day: 'Sun', hours: 0 },
-        ]);
       }
     } catch (error) {
-      console.error('Error fetching study time data:', error);
-      // Set default data on error
-      setStudyTimeData([
-        { day: 'Mon', hours: 0 },
-        { day: 'Tue', hours: 0 },
-        { day: 'Wed', hours: 0 },
-        { day: 'Thu', hours: 0 },
-        { day: 'Fri', hours: 0 },
-        { day: 'Sat', hours: 0 },
-        { day: 'Sun', hours: 0 },
-      ]);
+      console.error('Error in fetchStudyTimeData:', error);
+      // Default data is already set in state initialization
     }
   };
   
@@ -109,7 +114,15 @@ export default function DashboardPage() {
         .eq('user_id', user?.id)
         .order('count', { ascending: false });
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching subject distribution:', error);
+        if (error.code === '42P01') {
+          // Table doesn't exist, use default data
+          console.log('flashcard_decks table does not exist, using default data');
+          return;
+        }
+        throw error;
+      }
       
       if (data && data.length > 0) {
         // Group by subject and count
@@ -126,18 +139,10 @@ export default function DashboardPage() {
         }));
         
         setSubjectDistribution(formattedData);
-      } else {
-        // Set default data if no decks found
-        setSubjectDistribution([
-          { name: 'No data', value: 1 }
-        ]);
       }
     } catch (error) {
-      console.error('Error fetching subject distribution:', error);
-      // Set default data on error
-      setSubjectDistribution([
-        { name: 'No data', value: 1 }
-      ]);
+      console.error('Error in fetchSubjectDistribution:', error);
+      // Default data is already set in state initialization
     }
   };
   
@@ -151,7 +156,15 @@ export default function DashboardPage() {
         .order('created_at', { ascending: false })
         .limit(4);
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching recent activities:', error);
+        if (error.code === '42P01') {
+          // Table doesn't exist, use default data
+          console.log('user_activities table does not exist, using default data');
+          return;
+        }
+        throw error;
+      }
       
       if (data && data.length > 0) {
         const processedActivities = data.map(activity => {
@@ -187,12 +200,10 @@ export default function DashboardPage() {
         });
         
         setRecentActivities(processedActivities);
-      } else {
-        setRecentActivities([]);
       }
     } catch (error) {
-      console.error('Error fetching recent activities:', error);
-      setRecentActivities([]);
+      console.error('Error in fetchRecentActivities:', error);
+      // Empty array is fine for no activities
     }
   };
   
@@ -208,7 +219,15 @@ export default function DashboardPage() {
         .order('due_date', { ascending: true })
         .limit(3);
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching upcoming tasks:', error);
+        if (error.code === '42P01') {
+          // Table doesn't exist, use default data
+          console.log('tasks table does not exist, using default data');
+          return;
+        }
+        throw error;
+      }
       
       if (data && data.length > 0) {
         const processedTasks = data.map(task => {
@@ -225,51 +244,62 @@ export default function DashboardPage() {
         
         setUpcomingTasks(processedTasks);
         setStats(prev => ({ ...prev, upcomingTaskCount: data.length }));
-      } else {
-        setUpcomingTasks([]);
-        setStats(prev => ({ ...prev, upcomingTaskCount: 0 }));
       }
     } catch (error) {
-      console.error('Error fetching upcoming tasks:', error);
-      setUpcomingTasks([]);
-      setStats(prev => ({ ...prev, upcomingTaskCount: 0 }));
+      console.error('Error in fetchUpcomingTasks:', error);
+      // Empty array is fine for no tasks
     }
   };
   
   const fetchStats = async () => {
     try {
-      // Fetch total study hours
-      const { data: studyData, error: studyError } = await supabase
-        .from('study_sessions')
-        .select('duration')
-        .eq('user_id', user?.id);
+      // We'll set some default values
+      let totalHours = 0;
+      let totalFlashcards = 0;
+      let streakDays = 0;
       
-      if (studyError) throw studyError;
-      
-      const totalHours = studyData
-        ? studyData.reduce((sum, session) => sum + (session.duration / 60), 0)
-        : 0;
+      try {
+        // Fetch total study hours
+        const { data: studyData, error: studyError } = await supabase
+          .from('study_sessions')
+          .select('duration')
+          .eq('user_id', user?.id);
         
-      // Fetch total flashcards
-      const { data: flashcardData, error: flashcardError } = await supabase
-        .from('flashcards')
-        .select('count(*)', { count: 'exact' })
-        .eq('user_id', user?.id);
+        if (!studyError && studyData) {
+          totalHours = studyData.reduce((sum, session) => sum + (session.duration / 60), 0);
+        }
+      } catch (error) {
+        console.error('Error fetching study hours:', error);
+      }
       
-      if (flashcardError) throw flashcardError;
+      try {
+        // Fetch total flashcards
+        const { data: flashcardData, error: flashcardError } = await supabase
+          .from('flashcards')
+          .select('count(*)', { count: 'exact' })
+          .eq('user_id', user?.id);
+        
+        if (!flashcardError && flashcardData) {
+          totalFlashcards = flashcardData.length || 0;
+        }
+      } catch (error) {
+        console.error('Error fetching flashcards:', error);
+      }
       
-      const totalFlashcards = flashcardData?.length || 0;
-      
-      // Fetch streak data
-      const { data: streakData, error: streakError } = await supabase
-        .from('user_streaks')
-        .select('current_streak')
-        .eq('user_id', user?.id)
-        .single();
-      
-      if (streakError && streakError.code !== 'PGRST116') throw streakError;
-      
-      const streakDays = streakData ? streakData.current_streak : 0;
+      try {
+        // Fetch streak data
+        const { data: streakData, error: streakError } = await supabase
+          .from('user_streaks')
+          .select('current_streak')
+          .eq('user_id', user?.id)
+          .single();
+        
+        if (!streakError && streakData) {
+          streakDays = streakData.current_streak;
+        }
+      } catch (error) {
+        console.error('Error fetching streak data:', error);
+      }
       
       setStats({
         totalStudyHours: parseFloat(totalHours.toFixed(1)),
@@ -278,8 +308,8 @@ export default function DashboardPage() {
         upcomingTaskCount: upcomingTasks.length,
       });
     } catch (error) {
-      console.error('Error fetching stats:', error);
-      // Keep existing stats on error
+      console.error('Error in fetchStats:', error);
+      // Keep default stats
     }
   };
   
@@ -290,29 +320,45 @@ export default function DashboardPage() {
         setIsLoading(true);
         setLoadError(null);
         
+        // Set a loading timeout to prevent infinite loading
+        const timeoutId = setTimeout(() => {
+          if (isLoading) {
+            console.log('Loading timed out after 10 seconds');
+            setIsLoading(false);
+          }
+        }, 10000);
+        
         if (user) {
-          await refreshProfile();
+          try {
+            await refreshProfile();
+          } catch (profileError) {
+            console.error("Error refreshing profile:", profileError);
+            // Continue even if profile refresh fails
+          }
           
-          // Fetch all data in parallel
-          await Promise.all([
-            fetchStudyTimeData(),
-            fetchSubjectDistribution(),
-            fetchRecentActivities(),
-            fetchUpcomingTasks(),
+          // Fetch all data in parallel and catch errors for each
+          await Promise.allSettled([
+            fetchStudyTimeData().catch(e => console.error("Study time data error:", e)),
+            fetchSubjectDistribution().catch(e => console.error("Subject distribution error:", e)),
+            fetchRecentActivities().catch(e => console.error("Recent activities error:", e)),
+            fetchUpcomingTasks().catch(e => console.error("Upcoming tasks error:", e)),
           ]);
           
           // Fetch stats after other data is loaded
-          await fetchStats();
+          await fetchStats().catch(e => console.error("Stats error:", e));
         }
+        
+        // Clear the timeout as we're done loading
+        clearTimeout(timeoutId);
+        setIsLoading(false);
       } catch (error: any) {
         console.error("Error loading data:", error);
         
         if (error?.message?.includes('relation') || error?.code === '42P01') {
-          setLoadError(`Database error: Some tables may be missing. Please contact support.`);
+          setLoadError(`Some database tables may be missing. The dashboard will still work with default data.`);
         } else {
-          setLoadError("Failed to load dashboard data. Please try again later.");
+          setLoadError("Failed to load all dashboard data. Some sections may show default values.");
         }
-      } finally {
         setIsLoading(false);
       }
     };
@@ -363,15 +409,20 @@ export default function DashboardPage() {
     return (
       <div className="p-6">
         <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-          <div className="text-center">
-            <AlertTriangle size={40} className="text-red-500 dark:text-red-400 mx-auto mb-4" />
-            <h2 className="text-lg font-medium text-red-600 dark:text-red-400 mb-2">Error Loading Dashboard</h2>
+          <div className="text-center mb-4">
+            <AlertTriangle size={40} className="text-yellow-500 dark:text-yellow-400 mx-auto mb-4" />
+            <h2 className="text-lg font-medium text-yellow-600 dark:text-yellow-400 mb-2">Dashboard Notice</h2>
             <p className="text-gray-600 dark:text-gray-300 mb-4">{loadError}</p>
+          </div>
+          <div className="text-center">
+            <p className="mb-4 text-gray-600 dark:text-gray-400">
+              You can continue using the dashboard with sample data while we set up your personal data.
+            </p>
             <button
               onClick={() => window.location.reload()}
               className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
             >
-              Retry
+              Continue to Dashboard
             </button>
           </div>
         </div>

@@ -7,7 +7,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { 
   Edit, Award, Cake, Mail, Phone, Eye, EyeOff, 
-  Shield, FileCheck, BookOpen, Clock, Sparkles 
+  Shield, FileCheck, BookOpen, Clock, Sparkles, AlertTriangle, Loader2 
 } from 'lucide-react';
 
 // Sample achievements data
@@ -74,25 +74,40 @@ export default function ProfilePage() {
   
   // Load profile on mount
   useEffect(() => {
-    const loadProfileData = async () => {
-      try {
-        await refreshProfile();
-        // If refreshProfile doesn't set the userProfile state after 3 seconds, stop loading
-        setTimeout(() => {
-          setIsLoading(false);
-        }, 3000);
-      } catch (error) {
-        console.error('Error loading profile:', error);
+    // Add a timeout to prevent infinite loading
+    const loadTimeout = setTimeout(() => {
+      if (isLoading) {
+        console.log('Profile loading timed out after 10 seconds');
         setIsLoading(false);
+      }
+    }, 10000);
+    
+    const loadProfile = async () => {
+      try {
+        setIsLoading(true);
+        setMessage(null);
+        setError(null);
+        if (user) {
+          try {
+            await refreshProfile();
+          } catch (err: any) {
+            console.error('Error refreshing profile:', err);
+            setError('Failed to load profile data. Using default profile information.');
+          }
+        }
+      } catch (err: any) {
+        console.error('Error loading profile:', err);
+        setError('Could not load profile data. Please try again later.');
+      } finally {
+        setIsLoading(false);
+        clearTimeout(loadTimeout);
       }
     };
     
-    if (user) {
-      loadProfileData();
-    } else {
-      setIsLoading(false);
-    }
-  }, [refreshProfile, user]);
+    loadProfile();
+    
+    return () => clearTimeout(loadTimeout);
+  }, [user, refreshProfile]);
   
   // Handle avatar file selection
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -246,529 +261,185 @@ export default function ProfilePage() {
   // Show loading state while user profile is loading
   if (isLoading) {
     return (
-      <ProtectedRoute>
-        <div className="min-h-screen p-6 bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-          <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6 w-full max-w-md">
-            <div className="flex flex-col items-center justify-center py-8">
-              <div className="w-12 h-12 rounded-full border-4 border-t-blue-500 border-b-transparent border-l-transparent border-r-transparent animate-spin mb-4"></div>
-              <p className="text-gray-700 dark:text-gray-300">Loading your profile...</p>
-            </div>
-          </div>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <Loader2 className="w-10 h-10 text-indigo-600 animate-spin mx-auto mb-4" />
+          <p className="text-gray-600">Loading profile...</p>
         </div>
-      </ProtectedRoute>
+      </div>
+    );
+  }
+  
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <AlertTriangle className="w-10 h-10 text-yellow-500 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-gray-800 mb-2">Not Signed In</h2>
+          <p className="text-gray-600 mb-4">You need to sign in to view your profile.</p>
+          <a 
+            href="/auth/signin" 
+            className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+          >
+            Sign In
+          </a>
+        </div>
+      </div>
     );
   }
   
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        {/* Profile Header */}
-        <div className="bg-indigo-600 dark:bg-indigo-800">
-          <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col items-center sm:flex-row sm:justify-between">
-              <div className="flex flex-col sm:flex-row items-center mb-6 sm:mb-0">
-                <div 
-                  onClick={handleAvatarClick}
-                  className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden cursor-pointer border-4 border-white dark:border-gray-700 hover:opacity-90 transition-opacity shadow-lg mb-4 sm:mb-0 sm:mr-6"
-                >
-                  {avatarUrl ? (
-                    <Image
-                      src={avatarUrl}
-                      alt="Profile picture"
-                      fill
-                      style={{ objectFit: 'cover' }}
-                      priority
-                    />
-                  ) : (
-                    <div className="flex items-center justify-center w-full h-full bg-indigo-400 dark:bg-indigo-700">
-                      <span className="text-white text-2xl font-bold">
-                        {displayName?.charAt(0) || username?.charAt(0) || user?.email?.charAt(0) || '?'}
-                      </span>
-                    </div>
-                  )}
-                  
-                  <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 opacity-0 hover:opacity-100 transition-opacity">
-                    <Edit className="w-6 h-6 text-white" />
-                  </div>
-                  
-                  <div className="absolute -bottom-1 -right-1 bg-indigo-500 dark:bg-indigo-600 p-1 rounded-full border-2 border-white dark:border-gray-700">
-                    <Edit className="w-4 h-4 text-white" />
-                  </div>
-                </div>
-                
-                <input 
-                  type="file"
-                  ref={fileInputRef}
-                  accept="image/*"
-                  onChange={handleAvatarChange}
-                  className="hidden"
-                />
-                
-                <div>
-                  <h1 className="text-2xl sm:text-3xl font-bold text-white">
-                    {displayName || username || user?.email?.split('@')[0] || 'User'}
-                  </h1>
-                  <p className="text-indigo-200 mt-1">
-                    @{username || user?.email?.split('@')[0] || 'user'}
-                  </p>
-                  <div className="flex items-center mt-2">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-300 text-indigo-800 mr-2">
-                      <Award className="w-3 h-3 mr-1" />
-                      {earnedBadgesCount} Achievements
-                    </span>
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-300 text-purple-800">
-                      <Cake className="w-3 h-3 mr-1" />
-                      Member since {user?.created_at ? new Date(user.created_at).toLocaleDateString() : 'N/A'}
-                    </span>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="flex space-x-2">
-                <Link 
-                  href="/dashboard" 
-                  className="px-4 py-2 bg-white text-indigo-700 rounded-md hover:bg-indigo-50 font-medium transition-colors"
-                >
-                  Dashboard
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        {/* Tab Navigation */}
-        <div className="bg-white dark:bg-gray-800 shadow">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <nav className="flex space-x-8 overflow-x-auto">
-              <button
-                onClick={() => setActiveTab('general')}
-                className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === 'general'
-                    ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
-                }`}
-              >
-                General Information
-              </button>
-              <button
-                onClick={() => setActiveTab('security')}
-                className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === 'security'
-                    ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
-                }`}
-              >
-                Security & Privacy
-              </button>
-              <button
-                onClick={() => setActiveTab('achievements')}
-                className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === 'achievements'
-                    ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
-                }`}
-              >
-                Achievements
-              </button>
-            </nav>
-          </div>
-        </div>
-        
-        <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           {message && (
-            <div className={`p-4 mb-6 rounded-md ${message.type === 'success' ? 'bg-green-100 text-green-700 border border-green-400' : 'bg-red-100 text-red-700 border border-red-400'}`}>
+            <div className={`mb-6 bg-${message.type === 'success' ? 'green' : 'red'}-50 dark:bg-${message.type === 'success' ? 'green' : 'red'}-900/20 p-4 rounded-lg`}>
               {message.text}
             </div>
           )}
           
-          {/* General Information Tab */}
-          {activeTab === 'general' && (
-            <div className="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
-              <div className="px-6 pt-6 pb-4 border-b border-gray-200 dark:border-gray-700">
-                <h2 className="text-lg font-medium text-gray-900 dark:text-white">Profile Information</h2>
-                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                  Update your personal information and how you appear on the platform
-                </p>
+          {error && (
+            <div className="mb-6 bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg">
+              <div className="flex">
+                <AlertTriangle className="h-5 w-5 text-yellow-500 dark:text-yellow-400 mr-3" />
+                <p className="text-sm text-yellow-700 dark:text-yellow-300">{error}</p>
               </div>
-              
-              <form onSubmit={handleSubmit} className="p-6">
-                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                  <div>
-                    <label htmlFor="displayName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Display Name
-                    </label>
-                    <input
-                      id="displayName"
-                      type="text"
-                      value={displayName}
-                      onChange={(e) => setDisplayName(e.target.value)}
-                      placeholder="Enter your preferred display name"
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+            </div>
+          )}
+          
+          <div className="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
+            {/* Profile header */}
+            <div className="px-6 py-8 sm:px-8 border-b border-gray-200 dark:border-gray-700">
+              <div className="flex flex-col sm:flex-row items-center">
+                <div className="relative w-24 h-24 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700 flex-shrink-0 mb-4 sm:mb-0">
+                  {avatarUrl ? (
+                    <Image
+                      src={avatarUrl}
+                      alt="Profile"
+                      fill
+                      className="object-cover"
                     />
-                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                      This is how your name will appear to others
-                    </p>
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="username" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Username
-                    </label>
-                    <div className="mt-1 flex rounded-md shadow-sm">
-                      <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400 text-sm">
-                        @
+                  ) : (
+                    <div className="flex items-center justify-center w-full h-full">
+                      <span className="text-4xl font-medium text-gray-500 dark:text-gray-400">
+                        {displayName?.charAt(0) || username?.charAt(0) || user?.email?.charAt(0) || '?'}
                       </span>
-                      <input
-                        id="username"
-                        type="text"
-                        value={username}
-                        onChange={handleUsernameChange}
-                        placeholder="username"
-                        className={`flex-1 block w-full rounded-none rounded-r-md border ${usernameError ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} px-3 py-2 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
-                      />
                     </div>
-                    {usernameError ? (
-                      <p className="mt-1 text-xs text-red-500">{usernameError}</p>
-                    ) : (
-                      <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                        3-20 characters, letters, numbers, and underscores only
-                      </p>
-                    )}
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Email Address
-                    </label>
-                    <div className="mt-1 flex rounded-md shadow-sm">
-                      <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400 text-sm">
-                        <Mail className="w-4 h-4" />
-                      </span>
-                      <input
-                        id="email"
-                        type="email"
-                        value={userProfile?.email || user?.email || ''}
-                        disabled
-                        className="flex-1 block w-full rounded-none rounded-r-md border border-gray-300 dark:border-gray-600 px-3 py-2 bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 focus:outline-none"
-                      />
-                    </div>
-                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                      Your email cannot be changed
-                    </p>
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="phone" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Phone Number
-                    </label>
-                    <div className="mt-1 flex rounded-md shadow-sm">
-                      <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400 text-sm">
-                        <Phone className="w-4 h-4" />
-                      </span>
-                      <input
-                        id="phone"
-                        type="tel"
-                        value={userProfile?.phone || ''}
-                        disabled
-                        className="flex-1 block w-full rounded-none rounded-r-md border border-gray-300 dark:border-gray-600 px-3 py-2 bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 focus:outline-none"
-                      />
-                    </div>
-                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                      Contact support to change your phone number
-                    </p>
-                  </div>
+                  )}
                 </div>
-                
-                <div className="mt-6">
-                  <button
-                    type="submit"
-                    disabled={isLoading || !!usernameError}
-                    className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
-                  >
-                    {isLoading ? 'Saving...' : 'Save Changes'}
-                  </button>
-                </div>
-              </form>
-            </div>
-          )}
-          
-          {/* Security & Privacy Tab */}
-          {activeTab === 'security' && (
-            <div className="space-y-6">
-              <div className="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
-                <div className="px-6 pt-6 pb-4 border-b border-gray-200 dark:border-gray-700">
-                  <h2 className="text-lg font-medium text-gray-900 dark:text-white">
-                    Password
-                  </h2>
-                  <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                    Update your password to keep your account secure
-                  </p>
-                </div>
-                
-                <div className="p-6">
-                  <div className="space-y-4">
-                    <div>
-                      <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Current Password
-                      </label>
-                      <div className="relative">
-                        <input
-                          id="currentPassword"
-                          type={showPassword ? "text" : "password"}
-                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                          placeholder="••••••••"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 dark:text-gray-400"
-                        >
-                          {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                        </button>
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        New Password
-                      </label>
-                      <input
-                        id="newPassword"
-                        type={showPassword ? "text" : "password"}
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                        placeholder="••••••••"
-                      />
-                    </div>
-                    
-                    <div>
-                      <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Confirm New Password
-                      </label>
-                      <input
-                        id="confirmPassword"
-                        type={showPassword ? "text" : "password"}
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                        placeholder="••••••••"
-                      />
-                    </div>
+                <div className="sm:ml-6 text-center sm:text-left">
+                  <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                    {displayName || username || 'User'}
+                  </h1>
+                  <p className="text-gray-500 dark:text-gray-400 mt-1">{user.email}</p>
+                  <div className="mt-2 flex flex-wrap justify-center sm:justify-start">
+                    <span className="bg-indigo-100 text-indigo-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-indigo-900 dark:text-indigo-300 mr-2 mb-2">
+                      Premium Member
+                    </span>
+                    <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300 mr-2 mb-2">
+                      Active Streak: {userProfile?.streak_days || 0} days
+                    </span>
                   </div>
-                  
-                  <div className="mt-4">
-                    <button
-                      type="button"
-                      className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                    >
-                      Update Password
-                    </button>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
-                <div className="px-6 pt-6 pb-4 border-b border-gray-200 dark:border-gray-700">
-                  <h2 className="text-lg font-medium text-gray-900 dark:text-white">
-                    Privacy Settings
-                  </h2>
-                  <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                    Control what information is visible to others
-                  </p>
-                </div>
-                
-                <div className="p-6 space-y-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-900 dark:text-white">Profile Visibility</h3>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        Determine who can see your profile
-                      </p>
-                    </div>
-                    <div>
-                      <select
-                        value={privacySettings.profileVisibility}
-                        onChange={(e) => handlePrivacyChange('profileVisibility', e.target.value)}
-                        className="block w-36 px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:text-white text-sm"
-                      >
-                        <option value="public">Public</option>
-                        <option value="friends">Friends Only</option>
-                        <option value="private">Private</option>
-                      </select>
-                    </div>
-                  </div>
-                  
-                  <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
-                    <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-4">Contact Information</h3>
-                    
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center">
-                        <Mail className="w-5 h-5 text-gray-500 dark:text-gray-400 mr-2" />
-                        <span className="text-sm text-gray-700 dark:text-gray-300">Show email to others</span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => handlePrivacyChange('showEmail', !privacySettings.showEmail)}
-                        className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                          privacySettings.showEmail ? 'bg-indigo-600' : 'bg-gray-200 dark:bg-gray-700'
-                        }`}
-                      >
-                        <span className="sr-only">Show email</span>
-                        <span
-                          className={`pointer-events-none relative inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                            privacySettings.showEmail ? 'translate-x-5' : 'translate-x-0'
-                          }`}
-                        />
-                      </button>
-                    </div>
-                    
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center">
-                        <Phone className="w-5 h-5 text-gray-500 dark:text-gray-400 mr-2" />
-                        <span className="text-sm text-gray-700 dark:text-gray-300">Show phone number to others</span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => handlePrivacyChange('showPhone', !privacySettings.showPhone)}
-                        className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                          privacySettings.showPhone ? 'bg-indigo-600' : 'bg-gray-200 dark:bg-gray-700'
-                        }`}
-                      >
-                        <span className="sr-only">Show phone</span>
-                        <span
-                          className={`pointer-events-none relative inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                            privacySettings.showPhone ? 'translate-x-5' : 'translate-x-0'
-                          }`}
-                        />
-                      </button>
-                    </div>
-                  </div>
-                  
-                  <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="text-sm font-medium text-gray-900 dark:text-white">Activity Visibility</h3>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                          Allow others to see your study activity and achievements
-                        </p>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => handlePrivacyChange('activityVisible', !privacySettings.activityVisible)}
-                        className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                          privacySettings.activityVisible ? 'bg-indigo-600' : 'bg-gray-200 dark:bg-gray-700'
-                        }`}
-                      >
-                        <span className="sr-only">Activity visibility</span>
-                        <span
-                          className={`pointer-events-none relative inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                            privacySettings.activityVisible ? 'translate-x-5' : 'translate-x-0'
-                          }`}
-                        />
-                      </button>
-                    </div>
-                  </div>
-                  
-                  <div className="mt-4">
-                    <button
-                      type="button"
-                      className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                    >
-                      Save Privacy Settings
-                    </button>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
-                <div className="px-6 pt-6 pb-4 border-b border-gray-200 dark:border-gray-700">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h2 className="text-lg font-medium text-gray-900 dark:text-white">
-                        Two-Factor Authentication
-                      </h2>
-                      <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                        Add an extra layer of security to your account
-                      </p>
-                    </div>
-                    <Shield className="h-8 w-8 text-gray-400 dark:text-gray-500" />
-                  </div>
-                </div>
-                
-                <div className="p-6">
-                  <p className="text-sm text-gray-700 dark:text-gray-300 mb-4">
-                    Two-factor authentication adds an additional layer of security to your account by requiring more than just a password to sign in.
-                  </p>
-                  
-                  <button
-                    type="button"
-                    className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                  >
-                    Enable Two-Factor Authentication
-                  </button>
                 </div>
               </div>
             </div>
-          )}
-          
-          {/* Achievements Tab */}
-          {activeTab === 'achievements' && (
-            <div className="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
-              <div className="px-6 pt-6 pb-4 border-b border-gray-200 dark:border-gray-700">
-                <h2 className="text-lg font-medium text-gray-900 dark:text-white">Your Achievements</h2>
-                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                  Badges and awards earned through your study journey
-                </p>
-              </div>
-              
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    {earnedBadgesCount} of {achievements.length} badges earned
-                  </span>
-                  <div className="w-48 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-indigo-500 rounded-full"
-                      style={{ width: `${(earnedBadgesCount / achievements.length) * 100}%` }}
-                    ></div>
-                  </div>
+            
+            {/* Profile details */}
+            <div className="px-6 py-6 sm:px-8">
+              <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Profile Information</h2>
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Username</h3>
+                  <p className="mt-1 text-sm text-gray-900 dark:text-white">{userProfile?.username || 'Not set'}</p>
                 </div>
-                
-                <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
-                  {achievements.map((badge) => (
-                    <li 
-                      key={badge.id} 
-                      className={`border rounded-lg overflow-hidden p-4 ${
-                        badge.earned 
-                          ? 'border-indigo-200 dark:border-indigo-900 bg-indigo-50 dark:bg-indigo-900/20' 
-                          : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 opacity-60'
-                      }`}
-                    >
-                      <div className="flex items-start">
-                        <div className={`p-2 rounded-md mr-4 ${
-                          badge.earned 
-                            ? 'bg-indigo-100 dark:bg-indigo-800/50' 
-                            : 'bg-gray-100 dark:bg-gray-700'
-                        }`}>
-                          {badge.icon}
-                        </div>
-                        <div>
-                          <h3 className="font-semibold text-gray-900 dark:text-white">
-                            {badge.name}
-                            {badge.earned && (
-                              <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
-                                Earned
-                              </span>
-                            )}
-                          </h3>
-                          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                            {badge.description}
-                          </p>
-                        </div>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Display Name</h3>
+                  <p className="mt-1 text-sm text-gray-900 dark:text-white">{userProfile?.display_name || 'Not set'}</p>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Email</h3>
+                  <p className="mt-1 text-sm text-gray-900 dark:text-white">{user.email}</p>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Account Type</h3>
+                  <p className="mt-1 text-sm text-gray-900 dark:text-white">Premium</p>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Member Since</h3>
+                  <p className="mt-1 text-sm text-gray-900 dark:text-white">
+                    {userProfile?.created_at 
+                      ? new Date(userProfile.created_at).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric'
+                        })
+                      : new Date().toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric'
+                        })}
+                  </p>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Last Login</h3>
+                  <p className="mt-1 text-sm text-gray-900 dark:text-white">
+                    {userProfile?.last_sign_in 
+                      ? new Date(userProfile.last_sign_in).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })
+                      : new Date().toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                  </p>
+                </div>
               </div>
             </div>
-          )}
+            
+            {/* User stats */}
+            <div className="px-6 py-6 sm:px-8 border-t border-gray-200 dark:border-gray-700">
+              <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Your Statistics</h2>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                <div className="bg-indigo-50 dark:bg-indigo-900/30 p-4 rounded-lg">
+                  <h3 className="text-sm font-medium text-indigo-800 dark:text-indigo-300">Total Study Hours</h3>
+                  <p className="mt-1 text-2xl font-semibold text-indigo-900 dark:text-indigo-100">{userProfile?.total_study_hours || 0}</p>
+                </div>
+                <div className="bg-purple-50 dark:bg-purple-900/30 p-4 rounded-lg">
+                  <h3 className="text-sm font-medium text-purple-800 dark:text-purple-300">Flashcards Created</h3>
+                  <p className="mt-1 text-2xl font-semibold text-purple-900 dark:text-purple-100">{userProfile?.flashcards_created || 0}</p>
+                </div>
+                <div className="bg-green-50 dark:bg-green-900/30 p-4 rounded-lg">
+                  <h3 className="text-sm font-medium text-green-800 dark:text-green-300">Achievements Earned</h3>
+                  <p className="mt-1 text-2xl font-semibold text-green-900 dark:text-green-100">{userProfile?.achievements_count || 0}</p>
+                </div>
+              </div>
+            </div>
+            
+            {/* Actions */}
+            <div className="px-6 py-6 sm:px-8 border-t border-gray-200 dark:border-gray-700">
+              <div className="flex flex-col sm:flex-row sm:justify-end space-y-3 sm:space-y-0 sm:space-x-3">
+                <a 
+                  href="/settings" 
+                  className="px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-600"
+                >
+                  Edit Profile
+                </a>
+                <a 
+                  href="/dashboard" 
+                  className="px-4 py-2 bg-indigo-600 rounded-md text-sm font-medium text-white hover:bg-indigo-700"
+                >
+                  Go to Dashboard
+                </a>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </ProtectedRoute>
