@@ -327,7 +327,7 @@ export default function Hero() {
       }, 1500);
     };
 
-    // Fixing the dependencies for the useEffect hook - around line 331
+    // Fixing the dependencies for the useEffect hook
     useEffect(() => {
       // Only start animation when component is in view
       if (!inView) return;
@@ -342,7 +342,7 @@ export default function Hero() {
       }, 1000);
       
       return () => clearTimeout(animationTimeout);
-    }, [inView, animationCycle, currentQAIndex, questionsAndAnswers]);
+    }, [inView, animationCycle, currentQAIndex, questionsAndAnswers, startAnimation]);
 
   const startRollingAnimation = () => {
     setIsRolling(true);

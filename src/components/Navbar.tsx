@@ -2,11 +2,11 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { Menu, X, Moon, Sun, Sparkles, LogIn, UserCircle, LogOut } from "lucide-react";
 import { motion, useSpring } from "framer-motion";
 import { useTheme } from "./ThemeProvider";
 import { useAuth } from "../utils/AuthContext";
+import Image from "next/image";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -76,7 +76,7 @@ const Navbar = () => {
         <div className="flex justify-between items-center py-3 px-6">
           {/* Logo */}
           <Link href="#" className="flex items-center gap-2 group" onClick={scrollToTop}>
-            <div className="relative w-10 h-10 flex items-center justify-center">
+            <div className="relative w-8 h-8 flex items-center justify-center">
               <motion.div 
                 className="absolute w-full h-full bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg rotate-6 group-hover:rotate-12" 
                 animate={{
@@ -102,16 +102,14 @@ const Navbar = () => {
                   delay: 0.5
                 }}
               />
-              <div className="relative z-10 w-7 h-7">
-                <Image 
-                  src="https://i.ibb.co/x8csBSph/robot.png" 
-                  alt="StudyAI Robot Logo"
-                  width={28}
-                  height={28}
-                  className="object-contain"
-                  unoptimized={true}
-                />
-              </div>
+              <Image 
+                src="https://img.freepik.com/free-vector/ai-technology-robot-cyborg-illustrations_24640-134419.jpg" 
+                alt="StudyAI Logo" 
+                width={24} 
+                height={24} 
+                className="relative z-10 rounded-full" 
+                unoptimized={true}
+              />
             </div>
             <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-purple-600 dark:from-indigo-400 dark:to-purple-400 group-hover:from-indigo-400 group-hover:to-purple-500 dark:group-hover:from-indigo-300 dark:group-hover:to-purple-400 transition-all duration-300">
               StudyAI

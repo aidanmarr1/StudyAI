@@ -2,22 +2,26 @@ import "@/styles/globals.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import ThemeProvider from "@/components/ThemeProvider";
+import Footer from "@/components/Footer";
+import Navbar from "@/components/Navbar";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "StudyAI - AI-Powered Learning Platform",
-  description: "Study smarter with our AI-powered learning platform. Personalized tutoring, smart flashcards, and more.",
-  keywords: "AI learning, study AI, flashcards, learning platform, education technology",
-  icons: {
-    icon: [
-      { url: '/favicon.ico' },
-      { url: 'https://i.ibb.co/x8csBSph/robot.png', type: 'image/png' }
-    ],
-    apple: [
-      { url: 'https://i.ibb.co/x8csBSph/robot.png', type: 'image/png' }
-    ]
-  }
+  title: "StudyAI - Your AI-Powered Study Companion",
+  description: "StudyAI helps you study smarter with AI-powered learning tools, personalized study guides, flashcards, and practice quizzes.",
+  icons: [
+    {
+      rel: "icon",
+      url: "https://img.freepik.com/free-vector/ai-technology-robot-cyborg-illustrations_24640-134419.jpg",
+      sizes: "any"
+    },
+    {
+      rel: "apple-touch-icon",
+      url: "https://img.freepik.com/free-vector/ai-technology-robot-cyborg-illustrations_24640-134419.jpg",
+      sizes: "180x180"
+    }
+  ]
 };
 
 export default function RootLayout({
@@ -29,7 +33,11 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
         <ThemeProvider>
-          {children}
+          <div className="min-h-screen flex flex-col">
+            <Navbar />
+            <main className="flex-grow overflow-hidden">{children}</main>
+            <Footer />
+          </div>
         </ThemeProvider>
       </body>
     </html>
