@@ -5,9 +5,19 @@ import { motion } from "framer-motion";
 import { ArrowRight, Sparkles, Brain, Send, BookOpen, BookText, GraduationCap, School, Library, Microscope, Dna, Calculator, Star } from "lucide-react";
 import { useInView } from "react-intersection-observer";
 import Image from "next/image";
-import Link from "next/link";
-import { useTheme } from "./ThemeProvider";
-import TypingAnimation from "./TypingAnimation";
+
+// Add mergeRefs utility function at the top level
+function mergeRefs<T = any>(refs: Array<React.MutableRefObject<T> | React.LegacyRef<T>>): React.RefCallback<T> {
+  return (value) => {
+    refs.forEach((ref) => {
+      if (typeof ref === "function") {
+        ref(value);
+      } else if (ref != null) {
+        (ref as React.MutableRefObject<T | null>).current = value;
+      }
+    });
+  };
+}
 
 export default function Hero() {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -173,8 +183,6 @@ export default function Hero() {
   const [currentRating, setCurrentRating] = useState(0);
   const targetRating = 4.9;
 
-  const { darkMode } = useTheme();
-
   // Scroll chat to bottom when messages change
   useEffect(() => {
     if (chatContainerRef.current) {
@@ -234,7 +242,7 @@ export default function Hero() {
   }, []);
 
   // Cursor animation
-  useEffect(() => {
+  useEffect((): void | (() => void) => {
     // Only start animation when component is in view
     if (!inView) return;
 
@@ -247,7 +255,6 @@ export default function Hero() {
     // Update the current index state
     setCurrentQAIndex(nextIndex);
 
-    // Animation sequence
     const startAnimation = () => {
       // Reset states
       setAnimationStage(0);
@@ -332,22 +339,13 @@ export default function Hero() {
       }, 1500);
     };
 
-    // Fixing the dependencies for the useEffect hook - around line 331
-    useEffect(() => {
-      // Only start animation when component is in view
-      if (!inView) return;
-
-      // Reset animation state
-      setIsRolling(false);
-      setCurrentRating(0);
-      
-      // Add delay before starting animation
-      const animationTimeout = setTimeout(() => {
-        startAnimation();
-      }, 1000);
-      
-      return () => clearTimeout(animationTimeout);
-    }, [inView, animationCycle, currentQAIndex, questionsAndAnswers]);
+    // Add delay before starting animation
+    const animationTimeout = setTimeout(() => {
+      startAnimation();
+    }, 1000);
+    
+    return () => clearTimeout(animationTimeout);
+  }, [inView, animationCycle, currentQAIndex, questionsAndAnswers]);
 
   const startRollingAnimation = () => {
     setIsRolling(true);
@@ -475,114 +473,568 @@ export default function Hero() {
     backgroundImage: `radial-gradient(circle at ${gradientPosition.x}% ${gradientPosition.y}%, rgba(99, 102, 241, 0.15) 0%, rgba(139, 92, 246, 0.05) 50%, transparent 70%)`,
   };
 
-  return (
-    <section className="relative pb-20 pt-32 overflow-hidden">
-      {/* Background gradient elements */}
-      <div className="absolute inset-0 overflow-hidden -z-10">
-        <div className="absolute left-1/2 top-0 -z-10 -translate-x-1/2 blur-3xl xl:-top-6" aria-hidden="true">
-          <div
-            className="aspect-[1155/678] w-[72.1875rem] bg-gradient-to-tr from-[#ff80b5] to-[#9089fc] opacity-30 dark:opacity-20"
-            style={{
-              clipPath:
-                'polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)',
-            }}
-          />
-        </div>
-        <div
-          className="absolute -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80"
-          aria-hidden="true"
-        >
-          <div
-            className="relative aspect-[1155/678] w-[72.1875rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-purple-500 to-blue-500 opacity-20 dark:opacity-10 sm:left-[calc(50%-30rem)] sm:w-[72.1875rem]"
-            style={{
-              clipPath:
-                'polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)',
-            }}
-          />
-        </div>
-      </div>
+  // Inside the Hero component where mergeRefs is used
+  const combinedRef = React.useMemo(
+    () => mergeRefs([heroRef, inViewRef]),
+    [heroRef, inViewRef]
+  );
 
-      <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <div className="mx-auto max-w-2xl text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <h1 className="text-4xl font-bold tracking-tight sm:text-6xl bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-700 dark:from-indigo-400 dark:to-purple-500 mb-6">
-              StudyAI: Transform Your Learning Experience
-            </h1>
+  return (
+    <section
+      ref={combinedRef}
+      className="relative w-full min-h-screen flex items-center justify-center overflow-hidden"
+      style={gradientStyle}
+    >
+      {/* Decorative elements */}
+      <motion.div 
+        className="absolute top-20 left-1/4 w-64 h-64 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"
+        initial={{ opacity: 0, scale: 0 }}
+        animate={{ opacity: 0.2, scale: 1 }}
+        transition={{ duration: 2, delay: 0.5 }}
+      />
+      <motion.div 
+        className="absolute bottom-20 right-1/4 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"
+        initial={{ opacity: 0, scale: 0 }}
+        animate={{ opacity: 0.2, scale: 1 }}
+        transition={{ duration: 2, delay: 0.8 }}
+      />
+      <motion.div 
+        className="absolute -top-20 right-1/3 w-60 h-60 bg-pink-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000"
+        initial={{ opacity: 0, scale: 0 }}
+        animate={{ opacity: 0.2, scale: 1 }}
+        transition={{ duration: 2, delay: 1.2 }}
+      />
+
+      <div className="max-w-7xl w-full mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+        <motion.div
+          className="z-10"
+          variants={containerVariants}
+          initial="hidden"
+          animate={inView ? "visible" : "hidden"}
+        >
+          <motion.div variants={itemVariants} className="flex items-center mb-4 space-x-2">
+            <div className="flex items-center px-3 py-1 rounded-full border border-indigo-200 bg-indigo-50 dark:bg-indigo-900/20 dark:border-indigo-800">
+              <Sparkles className="h-4 w-4 text-indigo-600 dark:text-indigo-400 mr-2" />
+              <span className="text-sm font-medium text-indigo-600 dark:text-indigo-400">
+                AI-Powered Study Assistant
+              </span>
+            </div>
           </motion.div>
 
-          <motion.p 
-            className="mt-6 text-lg leading-8 text-gray-700 dark:text-gray-300"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
+          <motion.h1
+            variants={itemVariants}
+            className="text-5xl md:text-6xl font-extrabold leading-tight tracking-tight mb-6"
           >
-            <TypingAnimation 
-              phrases={[
-                "Create personalized study plans with AI.",
-                "Generate smart flashcards in seconds.",
-                "Track your progress with detailed analytics.",
-                "Receive tailored learning recommendations.",
-                "Join thousands of successful students."
-              ]}
-            />
+            Study Smarter with{" "}
+            <span className="text-gradient">
+              AI-Powered Learning
+            </span>
+          </motion.h1>
+
+          <motion.p
+            variants={itemVariants}
+            className="text-lg md:text-xl mb-8 max-w-2xl leading-relaxed"
+          >
+            Transform your learning experience with our advanced AI study assistant. 
+            Create comprehensive study guides, generate practice questions, and get instant feedback 
+            to help you master any subject effectively.
           </motion.p>
 
-          <motion.div 
-            className="mt-10 flex items-center justify-center gap-x-6"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-          >
-            <Link
-              href="/dashboard"
-              className="rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-3 text-lg font-semibold text-white shadow-sm hover:from-indigo-700 hover:to-purple-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition-all duration-300 hover:scale-105 hover:shadow-lg"
+          <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-4">
+            <motion.button
+              className="bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white rounded-lg px-6 py-3 font-medium flex items-center justify-center shadow-md hover:shadow-lg transition-all"
+              variants={buttonVariants}
+              initial="initial"
+              whileHover="hover"
+              whileTap="tap"
             >
-              Get Started
-              <ArrowRight className="ml-2 h-4 w-4 inline" />
-            </Link>
-            <Link
-              href="#features"
-              className="text-lg font-semibold leading-6 text-gray-900 dark:text-gray-100 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-300"
+              Get Started Free
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </motion.button>
+            <motion.button
+              className="border border-gray-300 dark:border-gray-700 rounded-lg px-6 py-3 font-medium flex items-center justify-center backdrop-blur-sm hover:backdrop-blur-lg transition-all"
+              variants={buttonVariants}
+              initial="initial"
+              whileHover="hover"
+              whileTap="tap"
             >
-              Learn more <span aria-hidden="true">→</span>
-            </Link>
+              Watch Demo
+            </motion.button>
           </motion.div>
-        </div>
 
-        <motion.div 
-          className="mt-16 flow-root sm:mt-24"
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.6 }}
+          <motion.div 
+            variants={captionVariants}
+            initial="hidden"
+            animate={inView ? "visible" : "hidden"}
+            className="mt-8 flex items-center"
+          >
+            <div className="flex -space-x-2 mr-3">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="w-8 h-8 rounded-full border-2 border-white dark:border-gray-800 overflow-hidden bg-gray-200">
+                  <Image 
+                    src={`https://randomuser.me/api/portraits/men/${i + 20}.jpg`} 
+                    alt={`User avatar ${i}`} 
+                    width={32} 
+                    height={32}
+                  />
+                </div>
+              ))}
+            </div>
+            <span className="text-sm text-gray-600 dark:text-gray-400">
+              <span className="font-semibold text-gray-900 dark:text-white">5,000+</span> students already use StudyAI
+            </span>
+
+            {/* Star rating lottery animation */}
+            <motion.div
+              className="mt-4 relative"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 2 }}
+            >
+              <div className="flex items-center">
+                {/* Star icons */}
+                <div className="flex mr-2 relative">
+                  {[1, 2, 3, 4, 5].map((_, index) => (
+                    <div key={index} className="relative">
+                      <Star 
+                        size={20} 
+                        className={`${index < Math.floor(currentRating) ? 'text-yellow-400 fill-yellow-400' : index < Math.ceil(currentRating) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'} mx-0.5`} 
+                      />
+                      
+                      {/* Partially filled star */}
+                      {index === Math.floor(currentRating) && currentRating % 1 !== 0 && (
+                        <div 
+                          className="absolute inset-0 overflow-hidden" 
+                          style={{ width: `${(currentRating % 1) * 100}%` }}
+                        >
+                          <Star size={20} className="text-yellow-400 fill-yellow-400 mx-0.5" />
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                  
+                  {/* Glowing effect when stars appear */}
+                  {showStars && (
+                    <motion.div 
+                      className="absolute inset-0 z-[-1]"
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ 
+                        opacity: [0, 0.7, 0],
+                        scale: [0.8, 1.2, 1.5]
+                      }}
+                      transition={{ 
+                        duration: 1.5,
+                        times: [0, 0.3, 1]
+                      }}
+                    >
+                      <div className="absolute inset-0 bg-yellow-400 blur-md rounded-full" />
+                    </motion.div>
+                  )}
+                  
+                  {/* Bang effect */}
+                  {showBang && (
+                    <motion.div
+                      className="absolute inset-0 z-[1] pointer-events-none"
+                      initial={{ scale: 0, opacity: 0 }}
+                      animate={{ 
+                        scale: [0, 1.5, 2],
+                        opacity: [0, 1, 0]
+                      }}
+                      transition={{ 
+                        duration: 0.7,
+                        ease: "easeOut"
+                      }}
+                    >
+                      {/* Radiating circles */}
+                      <div className="absolute inset-0 border-2 border-yellow-400 rounded-full" />
+                      
+                      {/* Star particles */}
+                      {[...Array(8)].map((_, i) => (
+                        <motion.div
+                          key={i}
+                          className="absolute w-1.5 h-1.5 bg-yellow-400 rounded-full"
+                          style={{
+                            left: '50%',
+                            top: '50%',
+                          }}
+                          animate={{
+                            x: [0, Math.cos(i * Math.PI/4) * 60],
+                            y: [0, Math.sin(i * Math.PI/4) * 60],
+                            opacity: [1, 0],
+                            scale: [1, 0]
+                          }}
+                          transition={{
+                            duration: 0.7,
+                            ease: "easeOut"
+                          }}
+                        />
+                      ))}
+                    </motion.div>
+                  )}
+                  
+                  {/* Shine effect */}
+                  {showShine && (
+                    <motion.div
+                      className="absolute inset-0 overflow-hidden"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: [0, 1, 0] }}
+                      transition={{ 
+                        duration: 1.2,
+                        times: [0, 0.2, 1]
+                      }}
+                    >
+                      <motion.div
+                        className="absolute inset-0 z-10"
+                        initial={{ 
+                          background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0) 0%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0) 100%)",
+                          left: "-100%"
+                        }}
+                        animate={{
+                          left: ["0%", "200%"]
+                        }}
+                        transition={{
+                          duration: 1,
+                          ease: "easeOut",
+                        }}
+                      />
+                    </motion.div>
+                  )}
+                </div>
+                
+                {/* Animated rating number */}
+                <motion.div 
+                  className="font-semibold text-gray-900 dark:text-white"
+                  animate={isRolling ? { scale: [1, 1.1, 1] } : {}}
+                  transition={{ 
+                    repeat: isRolling ? Infinity : 0,
+                    duration: 0.5
+                  }}
+                >
+                  <span className={`transition-all duration-200 ${showShine ? 'text-yellow-500 text-xl' : 'text-gray-900 dark:text-white'}`}>
+                    {currentRating.toFixed(1)}
+                  </span>
+                  <span className="text-sm text-gray-600 dark:text-gray-400 ml-1">
+                    from our students
+                  </span>
+                </motion.div>
+              </div>
+            </motion.div>
+          </motion.div>
+        </motion.div>
+
+        <motion.div
+          className="relative z-10 flex justify-center"
+          style={{
+            perspective: '1000px',
+          }}
         >
-          <div className="relative -m-2 rounded-xl bg-gray-900/5 dark:bg-gray-100/5 p-2 ring-1 ring-inset ring-gray-900/10 dark:ring-white/10 lg:-m-4 lg:rounded-2xl lg:p-4">
-            <Image
-              src={darkMode ? "/images/dashboard-dark.png" : "/images/dashboard-light.png"}
-              alt="App screenshot"
-              width={2432}
-              height={1442}
-              className="rounded-md shadow-2xl ring-1 ring-gray-900/10 dark:ring-white/10 transform hover:scale-[1.02] transition-transform duration-300"
-            />
-          </div>
+          <motion.div
+            className="relative"
+            style={{
+              transform: `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(${cardScale})`,
+              transition: 'transform 0.2s ease-out',
+            }}
+            variants={imageVariants}
+            initial="hidden"
+            animate={inView ? "visible" : "hidden"}
+          >
+            <div className="relative w-full max-w-lg mx-auto">
+              <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-indigo-500 to-purple-600 transform translate-y-4 translate-x-4 rotate-3 opacity-20 blur-xl" />
+              
+              {/* Chat UI Card with Animation */}
+              <div className="relative glass-card rounded-3xl w-full shadow-xl overflow-hidden">
+                {/* macOS window controls */}
+                <div className="absolute top-4 left-4 flex items-center space-x-2 z-10">
+                  <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                  <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                </div>
+                
+                {/* Cursor Animation - ensured it doesn't get cut off while maintaining consistent size */}
+                <motion.div 
+                  className="absolute w-12 h-12 z-[100] pointer-events-none"
+                  style={{ 
+                    willChange: "transform",
+                    transformOrigin: "12px 0px", // Align with the pointer tip
+                    overflow: "visible", // Ensure it doesn't get cut off
+                    filter: "drop-shadow(0 0 1px rgba(0,0,0,0.3))" // Add subtle shadow for better visibility
+                  }}
+                  initial={{ opacity: 0 }}
+                  animate={
+                    // Send button or input field click animation with enlarge-then-shrink effect
+                    (animationStage === 3 && cursorPosition.x > 400) || (animationStage === 2 && cursorPosition.x < 300)
+                    ? {
+                      opacity: 1,
+                      x: cursorPosition.x - 8,
+                      y: cursorPosition.y - 8,
+                      scale: [1, 1.05, 0.9, 1], // Subtle enlarge then click effect, then back to normal
+                      transition: {
+                        scale: {
+                          times: [0, 0.2, 0.5, 0.8], // Precise timing for each phase
+                          duration: 0.6, // Total animation duration
+                        }
+                      }
+                    } 
+                    : // Default animation
+                    {
+                      opacity: animationStage === 0 ? 0 : 1,
+                      x: cursorPosition.x - 8,
+                      y: cursorPosition.y - 8,
+                      scale: 1,
+                    }
+                  }
+                  transition={{ 
+                    x: { type: "spring", duration: 1.5, bounce: 0.1 },
+                    y: { type: "spring", duration: 1.5, bounce: 0.1 },
+                    opacity: { duration: 0.2 }
+                  }}
+                >
+                  <img 
+                    src="https://help.apple.com/assets/674E245FBF37DF041803DF82/674E2467BF37DF041803DFAD/en_US/a0d5e859e5f2b01dbbf81dfc38a3a92f.png" 
+                    alt="Cursor"
+                    className="w-full h-full object-contain"
+                  />
+                </motion.div>
+                
+                {/* Chat Interface - Added overflow: 'visible' to parent to ensure cursor isn't cut off */}
+                <div className="relative bg-white dark:bg-gray-800 rounded-lg overflow-visible shadow-sm m-6 h-[400px] flex flex-col">
+                  {/* Header */}
+                  <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700 flex items-center">
+                    <Brain className="h-4 w-4 text-indigo-600 mr-2" />
+                    <span className="text-sm font-medium">Study Assistant</span>
+                  </div>
+                  
+                  {/* Chat Messages - Add ref for scrolling */}
+                  <div ref={chatContainerRef} className="flex-1 overflow-y-auto p-4">
+                    <div className="flex flex-col space-y-4">
+                      {/* Initial AI Message */}
+                      <div className="flex items-start">
+                        <div className="w-8 h-8 bg-indigo-100 dark:bg-indigo-900/30 rounded-full flex items-center justify-center text-indigo-600 mr-3 mt-1">
+                          <span className="text-sm font-bold">AI</span>
+                        </div>
+                        <div className="flex-1 bg-gray-100 dark:bg-gray-700/50 rounded-2xl p-3">
+                          <p className="text-sm">How would you like me to help with your biology exam today?</p>
+                        </div>
+                      </div>
+                      
+                      {/* User Message 1 */}
+                      <div className="flex items-start justify-end">
+                        <div className="flex-1 bg-indigo-500 rounded-2xl p-3 ml-10 text-white">
+                          <p className="text-sm">I need help with cellular respiration concepts.</p>
+                        </div>
+                      </div>
+                      
+                      {/* AI Response 1 */}
+                      <div className="flex items-start">
+                        <div className="w-8 h-8 bg-indigo-100 dark:bg-indigo-900/30 rounded-full flex items-center justify-center text-indigo-600 mr-3 mt-1">
+                          <span className="text-sm font-bold">AI</span>
+                        </div>
+                        <div className="flex-1 bg-gray-100 dark:bg-gray-700/50 rounded-2xl p-3">
+                          <p className="text-sm">Cellular respiration is the process where cells convert nutrients into energy (ATP). I'll create a study guide with key concepts:</p>
+                          <ul className="mt-2 text-sm list-disc list-inside space-y-1">
+                            <li>Glycolysis process and outputs</li>
+                            <li>Krebs cycle steps and products</li>
+                            <li>Electron transport chain function</li>
+                            <li>ATP synthesis mechanism</li>
+                          </ul>
+                        </div>
+                      </div>
+                      
+                      {/* Animated User Message */}
+                      {typedText.length > 0 && animationStage >= 3 && (
+                        <motion.div 
+                          className="flex items-start justify-end"
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ 
+                            duration: 0.4, 
+                            ease: "easeOut" 
+                          }}
+                        >
+                          <div className="flex-1 bg-indigo-500 rounded-2xl p-3 ml-10 text-white">
+                            <p className="text-sm">
+                              {typedText}
+                            </p>
+                          </div>
+                        </motion.div>
+                      )}
+                      
+                      {/* Typing Indicator */}
+                      {showTypingIndicator && (
+                        <motion.div 
+                          className="flex items-start"
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ 
+                            duration: 0.4, 
+                            ease: "easeOut" 
+                          }}
+                        >
+                          <div className="w-8 h-8 bg-indigo-100 dark:bg-indigo-900/30 rounded-full flex items-center justify-center text-indigo-600 mr-3 mt-1">
+                            <span className="text-sm font-bold">AI</span>
+                          </div>
+                          <div className="min-w-[42px] max-w-[60px] bg-gray-100 dark:bg-gray-700/50 rounded-full py-2 px-3">
+                            <div className="flex space-x-1.5 justify-center items-center">
+                              <div className="w-1.5 h-1.5 bg-gray-500 dark:bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }}></div>
+                              <div className="w-1.5 h-1.5 bg-gray-500 dark:bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }}></div>
+                              <div className="w-1.5 h-1.5 bg-gray-500 dark:bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }}></div>
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}
+                      
+                      {/* Animated AI Response - Dynamic based on current question */}
+                      {showAIResponse && (
+                        <motion.div 
+                          className="flex items-start"
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ 
+                            duration: 0.5, 
+                            ease: "easeOut" 
+                          }}
+                        >
+                          <div className="w-8 h-8 bg-indigo-100 dark:bg-indigo-900/30 rounded-full flex items-center justify-center text-indigo-600 mr-3 mt-1">
+                            <span className="text-sm font-bold">AI</span>
+                          </div>
+                          <div className="flex-1 bg-gray-100 dark:bg-gray-700/50 rounded-2xl p-3">
+                            <p className="text-sm">{questionsAndAnswers[currentQAIndex].answer.text}</p>
+                            <ul className="mt-2 text-sm list-disc list-inside space-y-1">
+                              {questionsAndAnswers[currentQAIndex].answer.bullets.map((bullet, index) => (
+                                <li key={index}>{bullet}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        </motion.div>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {/* Input Area - added z-index to ensure it's below the cursor */}
+                  <div className="p-3 border-t border-gray-100 dark:border-gray-700 relative z-10">
+                    <div className="relative flex">
+                      <div className="flex-1 bg-gray-100 dark:bg-gray-700 rounded-lg px-4 py-2 pr-10 min-h-[36px]">
+                        {animationStage === 2 ? (
+                          <span className="text-sm">
+                            {inputFieldText}
+                            {showInputCursor && <span className="inline-block h-4 w-0.5 bg-gray-500 dark:bg-gray-400 ml-0.5 animate-blink"></span>}
+                          </span>
+                        ) : (
+                          <span className="text-sm text-gray-500 dark:text-gray-400">Type something here...</span>
+                        )}
+                      </div>
+                      <button 
+                        className={`absolute right-1 top-1/2 transform -translate-y-1/2 text-indigo-500 dark:text-indigo-400 p-1.5 bg-indigo-500 bg-opacity-20 rounded-lg hover:bg-opacity-30 transition-all ${animationStage === 3 && !typedText ? 'scale-90' : ''}`}
+                        style={{ transition: 'transform 0.1s ease-in-out' }} // Smooth transition for click effect
+                      >
+                        <Send size={18} /> {/* Slightly larger send icon for easier targeting */}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Floating educational icons - repositioned and resized without containers */}
+            <motion.div 
+              className="absolute top-[-40px] right-[-50px]"
+              variants={shapeVariants}
+              initial="hidden"
+              animate={inView ? "visible" : "hidden"}
+              style={{ transformStyle: 'preserve-3d', zIndex: 1 }}
+              whileHover={{ scale: 1.1, rotate: 5 }}
+            >
+              <motion.div
+                animate={{
+                  rotate: [0, -5, 5, 0],
+                  scale: [1, 1.05, 1, 1.05, 1]
+                }}
+                transition={{
+                  duration: 5,
+                  ease: "easeInOut",
+                  repeat: Infinity,
+                  repeatType: "loop"
+                }}
+              >
+                <GraduationCap size={42} className="text-indigo-600 dark:text-indigo-400" />
+              </motion.div>
+            </motion.div>
+            
+            <motion.div 
+              className="absolute bottom-[-60px] left-[-50px]"
+              variants={shapeVariants}
+              initial="hidden"
+              animate={inView ? "visible" : "hidden"}
+              style={{ transformStyle: 'preserve-3d', zIndex: 1 }}
+              whileHover={{ scale: 1.1, rotate: -5 }}
+            >
+              <motion.div
+                animate={{
+                  y: [0, -5, 0],
+                  rotate: [0, 3, 0, -3, 0]
+                }}
+                transition={{
+                  duration: 4,
+                  ease: "easeInOut",
+                  repeat: Infinity,
+                  repeatType: "loop"
+                }}
+              >
+                <BookOpen size={46} className="text-purple-600 dark:text-purple-400" />
+              </motion.div>
+            </motion.div>
+            
+            <motion.div 
+              className="absolute top-[100px] left-[-70px]"
+              variants={shapeVariants}
+              initial="hidden"
+              animate={inView ? "visible" : "hidden"}
+              style={{ transformStyle: 'preserve-3d', zIndex: 1 }}
+              whileHover={{ scale: 1.1, rotate: 5 }}
+            >
+              <motion.div
+                animate={{
+                  scale: [1, 1.1, 1],
+                  rotate: [0, -5, 5, 0]
+                }}
+                transition={{
+                  duration: 6,
+                  ease: "easeInOut",
+                  repeat: Infinity,
+                  repeatType: "loop"
+                }}
+              >
+                <BookText size={38} className="text-blue-600 dark:text-blue-400" />
+              </motion.div>
+            </motion.div>
+
+            {/* Additional educational icons */}
+            <motion.div 
+              className="absolute bottom-[60px] right-[-50px]"
+              variants={shapeVariants}
+              initial="hidden"
+              animate={inView ? "visible" : "hidden"}
+              style={{ transformStyle: 'preserve-3d', zIndex: 1 }}
+              whileHover={{ scale: 1.1, rotate: -5 }}
+            >
+              <motion.div
+                animate={{
+                  rotate: [0, 5, -5, 5, 0],
+                  scale: [1, 1.08, 1]
+                }}
+                transition={{
+                  duration: 7,
+                  ease: "easeInOut",
+                  repeat: Infinity,
+                  repeatType: "loop"
+                }}
+              >
+                <Calculator size={36} className="text-purple-800 dark:text-purple-600" />
+              </motion.div>
+            </motion.div>
+          </motion.div>
         </motion.div>
       </div>
     </section>
   );
-}
-
-// Helper function to merge refs
-function mergeRefs(...refs: any[]) {
-  return (node: any) => {
-    refs.forEach((ref) => {
-      if (typeof ref === 'function') {
-        ref(node);
-      } else if (ref != null) {
-        ref.current = node;
-      }
-    });
-  };
 } 

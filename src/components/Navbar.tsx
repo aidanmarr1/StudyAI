@@ -6,9 +6,6 @@ import { Menu, X, Moon, Sun, Sparkles, Brain, LogIn, UserCircle, LogOut } from "
 import { motion, useSpring } from "framer-motion";
 import { useTheme } from "./ThemeProvider";
 import { useAuth } from "../utils/AuthContext";
-import { Button } from "./ui/button";
-import { ThemeToggle } from "./ThemeToggle";
-import { cn } from "@/lib/utils";
 import Image from "next/image";
 
 const Navbar = () => {
@@ -65,7 +62,7 @@ const Navbar = () => {
   };
 
   return (
-    <header className={cn("fixed top-0 w-full z-50 px-4", className)}>
+    <header className="fixed top-0 w-full z-50 px-4">
       <motion.div 
         className={`mx-auto my-4 max-w-7xl rounded-full ${
           scrolled 
@@ -78,7 +75,7 @@ const Navbar = () => {
       >
         <div className="flex justify-between items-center py-3 px-6">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 group" onClick={scrollToTop}>
+          <Link href="#" className="flex items-center gap-2 group" onClick={scrollToTop}>
             <div className="relative w-8 h-8 flex items-center justify-center">
               <motion.div 
                 className="absolute w-full h-full bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg rotate-6 group-hover:rotate-12" 
@@ -107,10 +104,10 @@ const Navbar = () => {
               />
               <Image 
                 src="https://img.freepik.com/free-vector/ai-technology-robot-cyborg-illustrations_24640-134419.jpg"
-                alt="StudyAI Robot"
-                width={32}
-                height={32}
-                className="relative z-10 rounded-md"
+                alt="StudyAI Logo"
+                width={24}
+                height={24}
+                className="relative z-10 rounded-sm"
                 unoptimized={true}
               />
             </div>
