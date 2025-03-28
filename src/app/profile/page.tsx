@@ -49,6 +49,7 @@ export default function ProfilePage() {
   const [displayName, setDisplayName] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [usernameError, setUsernameError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('general');
@@ -74,33 +75,41 @@ export default function ProfilePage() {
   
   // Load profile on mount
   useEffect(() => {
-    // Add a timeout to prevent infinite loading
+    // Add a timeout to prevent infinite loading - max 2 seconds
     const loadTimeout = setTimeout(() => {
-      if (isLoading) {
-        console.log('Profile loading timed out after 10 seconds');
-        setIsLoading(false);
-      }
-    }, 10000);
+      console.log('Profile loading timed out after 2 seconds');
+      setIsLoading(false);
+    }, 2000);
     
     const loadProfile = async () => {
       try {
         setIsLoading(true);
         setMessage(null);
-        setError(null);
+        if (typeof setError === 'function') {
+          setError(null);
+        }
+        
         if (user) {
           try {
-            await refreshProfile();
-          } catch (err: any) {
-            console.error('Error refreshing profile:', err);
-            setError('Failed to load profile data. Using default profile information.');
+            // Don't await this to avoid long loading times
+            refreshProfile().catch(err => {
+              console.error('Error refreshing profile:', err);
+            });
+            
+            // Set a short timeout for any profile data to load
+            setTimeout(() => {
+              setIsLoading(false);
+            }, 1000);
+          } catch (err) {
+            console.error('Error in profile loading:', err);
+            setIsLoading(false);
           }
+        } else {
+          setIsLoading(false);
         }
-      } catch (err: any) {
-        console.error('Error loading profile:', err);
-        setError('Could not load profile data. Please try again later.');
-      } finally {
+      } catch (err) {
+        console.error('Error in profile loading:', err);
         setIsLoading(false);
-        clearTimeout(loadTimeout);
       }
     };
     

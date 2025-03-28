@@ -320,13 +320,11 @@ export default function DashboardPage() {
         setIsLoading(true);
         setLoadError(null);
         
-        // Set a loading timeout to prevent infinite loading
+        // Set a loading timeout to prevent infinite loading - max 2 seconds
         const timeoutId = setTimeout(() => {
-          if (isLoading) {
-            console.log('Loading timed out after 10 seconds');
-            setIsLoading(false);
-          }
-        }, 10000);
+          console.log('Loading timed out after 2 seconds');
+          setIsLoading(false);
+        }, 2000);
         
         if (user) {
           try {
@@ -337,20 +335,24 @@ export default function DashboardPage() {
           }
           
           // Fetch all data in parallel and catch errors for each
-          await Promise.allSettled([
+          Promise.allSettled([
             fetchStudyTimeData().catch(e => console.error("Study time data error:", e)),
             fetchSubjectDistribution().catch(e => console.error("Subject distribution error:", e)),
             fetchRecentActivities().catch(e => console.error("Recent activities error:", e)),
             fetchUpcomingTasks().catch(e => console.error("Upcoming tasks error:", e)),
-          ]);
+          ]).finally(() => {
+            // Ensure loading is set to false when all promises settle
+            clearTimeout(timeoutId);
+            setIsLoading(false);
+          });
           
-          // Fetch stats after other data is loaded
-          await fetchStats().catch(e => console.error("Stats error:", e));
+          // Fetch stats - don't await this to prevent loading delays
+          fetchStats().catch(e => console.error("Stats error:", e));
+        } else {
+          // No user, clear timeout and stop loading
+          clearTimeout(timeoutId);
+          setIsLoading(false);
         }
-        
-        // Clear the timeout as we're done loading
-        clearTimeout(timeoutId);
-        setIsLoading(false);
       } catch (error: any) {
         console.error("Error loading data:", error);
         
