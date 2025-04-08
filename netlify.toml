@@ -1,15 +1,20 @@
 [build]
   command = "npm run build"
-  publish = ".next"
+  publish = "out"
 
 [build.environment]
-  NETLIFY_NEXT_PLUGIN_SKIP = "false"
+  # Skip the Next.js plugin since we're using static export
+  NETLIFY_NEXT_PLUGIN_SKIP = "true"
 
-[[plugins]]
-  package = "@netlify/plugin-nextjs"
-
-# No need for custom redirects with the Next.js plugin, but keeping a fallback
+# Handle all routes for SPA navigation
 [[redirects]]
   from = "/*"
-  to = "/404"
-  status = 404 
+  to = "/index.html"
+  status = 200
+
+# If you need a custom 404 page
+[[redirects]]
+  from = "/*"
+  to = "/404.html"
+  status = 404
+  force = false 
