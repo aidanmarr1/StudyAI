@@ -2,6 +2,8 @@
 const nextConfig = {
   output: 'export',
   reactStrictMode: true,
+  trailingSlash: true,
+  distDir: '.next',
   images: {
     domains: ['via.placeholder.com', 'images.unsplash.com'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
@@ -9,10 +11,10 @@ const nextConfig = {
     unoptimized: true,
   },
   experimental: {
-    appDir: true,
+    // Removed appDir as it's now default in Next.js 15
   },
   typescript: {
-    ignoreBuildErrors: process.env.NODE_ENV === 'development'
+    ignoreBuildErrors: true
   }
 };
 

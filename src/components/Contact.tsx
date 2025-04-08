@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Send, Mail, Phone, MapPin, Facebook, Instagram, Linkedin } from "lucide-react";
 
@@ -19,8 +19,15 @@ const XIcon = ({ className = "h-5 w-5" }) => (
   </svg>
 );
 
+interface FormData {
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+}
+
 const Contact = () => {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     name: "",
     email: "",
     subject: "",
@@ -28,7 +35,6 @@ const Contact = () => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- will be used for future error handling
   const [submitError, setSubmitError] = useState("");
 
   const handleChange = (
