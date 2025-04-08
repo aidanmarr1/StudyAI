@@ -1,9 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export',
   reactStrictMode: true,
   trailingSlash: true,
-  distDir: '.next',
   images: {
     domains: ['via.placeholder.com', 'images.unsplash.com'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],

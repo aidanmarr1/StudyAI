@@ -8,14 +8,8 @@
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
-# These redirects are used as fallbacks
+# No need for custom redirects with the Next.js plugin, but keeping a fallback
 [[redirects]]
   from = "/*"
-  to = "/404.html"
-  status = 404
-
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
-  force = false 
+  to = "/404"
+  status = 404 
