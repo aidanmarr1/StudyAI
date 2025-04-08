@@ -103,13 +103,12 @@ const Footer = () => {
                     delay: 0.5
                   }}
                 />
-                <Image 
-                  src="https://img.freepik.com/free-vector/ai-technology-robot-cyborg-illustrations_24640-134419.jpg"
-                  alt="StudyAI Logo"
-                  width={24}
-                  height={24}
-                  className="relative z-10 rounded-sm"
-                  unoptimized={true}
+                <Image
+                  src="/images/robot.png"
+                  alt="StudyAI Robot Logo"
+                  width={40}
+                  height={40}
+                  className="object-contain rounded-md"
                 />
               </div>
               <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-purple-600 dark:from-indigo-400 dark:to-purple-400">

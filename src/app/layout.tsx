@@ -6,28 +6,33 @@ import ThemeProvider from "@/components/ThemeProvider";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "StudyAI - AI-Powered Learning Platform",
-  description: "Study smarter with our AI-powered learning platform. Personalized tutoring, smart flashcards, and more.",
-  keywords: "AI learning, study AI, flashcards, learning platform, education technology",
+  title: "StudyAI - Your AI-Powered Study Companion",
+  description:
+    "StudyAI helps students learn more effectively with AI-powered flashcards, quiz generation, and personalized study plans",
+  keywords: ["AI", "education", "studying", "learning", "flashcards", "quiz"],
   icons: {
     icon: [
       {
-        url: "https://img.freepik.com/free-vector/ai-technology-robot-cyborg-illustrations_24640-134419.jpg",
+        url: "/images/robot.png",
         sizes: "32x32",
-        type: "image/jpg",
+        type: "image/png",
       },
       {
-        url: "https://img.freepik.com/free-vector/ai-technology-robot-cyborg-illustrations_24640-134419.jpg",
+        url: "/images/robot.png",
         sizes: "16x16",
-        type: "image/jpg",
-      }
+        type: "image/png",
+      },
     ],
-    apple: [
+    apple: {
+      url: "/images/robot.png",
+      sizes: "180x180",
+      type: "image/png",
+    },
+    other: [
       {
-        url: "https://img.freepik.com/free-vector/ai-technology-robot-cyborg-illustrations_24640-134419.jpg",
-        sizes: "180x180",
-        type: "image/jpg",
-      }
+        rel: "icon",
+        url: "/images/robot.png",
+      },
     ],
   },
 };
@@ -40,22 +45,22 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <link 
-          rel="icon" 
-          type="image/jpg" 
-          sizes="32x32" 
-          href="https://img.freepik.com/free-vector/ai-technology-robot-cyborg-illustrations_24640-134419.jpg" 
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="32x32"
+          href="/images/robot.png"
         />
-        <link 
-          rel="icon" 
-          type="image/jpg" 
-          sizes="16x16" 
-          href="https://img.freepik.com/free-vector/ai-technology-robot-cyborg-illustrations_24640-134419.jpg" 
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="16x16"
+          href="/images/robot.png"
         />
-        <link 
-          rel="apple-touch-icon" 
-          sizes="180x180" 
-          href="https://img.freepik.com/free-vector/ai-technology-robot-cyborg-illustrations_24640-134419.jpg" 
+        <link
+          rel="apple-touch-icon"
+          sizes="180x180"
+          href="/images/robot.png"
         />
       </head>
       <body className={inter.className}>
