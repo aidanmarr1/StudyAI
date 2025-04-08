@@ -3,18 +3,16 @@
   publish = "out"
 
 [build.environment]
-  # Skip the Next.js plugin since we're using static export
   NETLIFY_NEXT_PLUGIN_SKIP = "true"
 
-# Handle all routes for SPA navigation
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
-
-# If you need a custom 404 page
+# These redirects are crucial for SPA navigation
 [[redirects]]
   from = "/*"
   to = "/404.html"
   status = 404
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
   force = false 
