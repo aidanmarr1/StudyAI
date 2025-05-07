@@ -1,9 +1,3 @@
-import DashboardClient from './dashboard-client';
-
-export default function DashboardPage() {
-  return <DashboardClient />;
-}
-
 'use client';
 
 import React, { useEffect, useState } from 'react';
@@ -96,7 +90,7 @@ const DEFAULT_UPCOMING_TASKS = [
   }
 ];
 
-function DashboardClient() {
+export default function DashboardClient() {
   // We'll wrap the component in ProtectedRoute later
   return (
     <ProtectedRoute>

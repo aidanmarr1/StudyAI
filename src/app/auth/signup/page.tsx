@@ -1,6 +1,4 @@
-import React from 'react';
-import SignUpForm from '../../../components/auth/SignUpForm';
-import Link from 'next/link';
+import SignUpClient from './signup-client';
 
 export default function SignUpPage() {
   return (
@@ -11,17 +9,31 @@ export default function SignUpPage() {
           <p className="mt-2 text-gray-600 dark:text-gray-400">Your Intelligent Study Companion</p>
         </div>
         
-        <SignUpForm />
-        
-        <div className="mt-6 text-center">
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            Already have an account?{' '}
-            <Link href="/auth/signin" className="font-medium text-indigo-600 hover:text-indigo-500">
-              Sign in
-            </Link>
-          </p>
-        </div>
+        <SignUpClient />
       </div>
     </div>
+  );
+}
+
+'use client';
+
+import React from 'react';
+import SignUpForm from '../../../components/auth/SignUpForm';
+import Link from 'next/link';
+
+function SignUpClient() {
+  return (
+    <>
+      <SignUpForm />
+      
+      <div className="mt-6 text-center">
+        <p className="text-sm text-gray-600 dark:text-gray-400">
+          Already have an account?{' '}
+          <Link href="/auth/signin" className="font-medium text-indigo-600 hover:text-indigo-500">
+            Sign in
+          </Link>
+        </p>
+      </div>
+    </>
   );
 } 

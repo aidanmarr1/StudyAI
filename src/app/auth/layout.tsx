@@ -3,7 +3,7 @@
 import React from 'react';
 import { AuthProvider } from '../../utils/AuthContext';
 
-export default function DashboardLayout({
+export default function AuthLayout({
   children,
 }: {
   children: React.ReactNode;

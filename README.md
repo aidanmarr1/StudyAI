@@ -16,7 +16,6 @@ StudyAI is a modern learning platform that uses artificial intelligence to revol
 - **Frontend**: Next.js 15, React 19, TailwindCSS
 - **Animation**: Framer Motion
 - **Backend**: Supabase
-- **Deployment**: Vercel
 
 ## Getting Started
 
@@ -74,10 +73,6 @@ studyai/
 ├── utils/              # Utility functions
 └── ...                 # Config files
 ```
-
-## Deployment
-
-This project is automatically deployed to Vercel when changes are pushed to the main branch.
 
 ## License
 

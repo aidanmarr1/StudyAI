@@ -9,15 +9,10 @@ To use the robot image you've provided:
 
 The image will be automatically used when your application is running.
 
-## Netlify Deployment
+## Deployment
 
-This project is now configured for Netlify deployment. To deploy:
+This project is configured for static site deployment. To deploy:
 
 1. Push your changes to your Git repository
-2. Log into your Netlify account
-3. Create a new site from Git and select your repository
-4. Use the following build settings:
-   - Build command: `npm run build`
-   - Publish directory: `.next`
-
-Netlify will automatically use the settings in the `netlify.toml` file at the root of the project. 
+2. Use the static export in the `out` directory
+3. Upload to your preferred hosting service 

@@ -1,0 +1,6 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+After making any changes to the project, always make sure to deploy to Vercel. This ensures that the most recent updates are live and accessible. Consistently deploying after changes helps maintain version control, avoid confusion, and allows stakeholders or team members to view the latest version of the site or application without delay. It's important to treat deployment as a regular part of the development workflow to ensure seamless updates and minimize potential issues caused by outdated code in production.
